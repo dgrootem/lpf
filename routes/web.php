@@ -11,11 +11,9 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'PeriodeController@defaultRange');
 
-Route::get('/periodes/create', 'PeriodeController@create');
+Route::get('/periodes/create/{leerkracht}', 'PeriodeController@create');
 Route::get('/periodes/{periode}/edit', 'PeriodeController@edit');
 
 Route::post('/periodes', 'PeriodeController@store');

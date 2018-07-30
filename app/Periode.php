@@ -16,4 +16,18 @@ class Periode extends Model
      'opmerking',
      'heleDag'
    ];
+
+
+   public function school()
+   {
+       return $this->belongsTo(School::class);
+   }
+   public function status()
+   {
+       return $this->belongsTo(Status::class);
+   }
+   public function leerkracht()
+   {
+       return $this->belongsTo(Leerkracht::class);
+   }
 }

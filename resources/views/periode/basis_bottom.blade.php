@@ -4,6 +4,7 @@
 </div>
 
 <div class="form-row">
-  <div class="col"><button type="cancel" class="btn btn-secondary">Annuleer</button></div>
+  {{-- <div class="col"><button type="reset" class="btn btn-secondary">Annuleer</button></div> --}}
+  <a class="btn btn-secondary btn-close" href="/">Annuleer</a>
   <div class="col"><button type="submit" class="btn btn-primary float-md-right">Bewaar</button></div>
 </div>

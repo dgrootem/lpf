@@ -4,20 +4,21 @@ use Illuminate\Database\Seeder;
 
 require_once(__DIR__.'/MyCsvSeeder.php');
 
-class LeerkrachtSeeder extends Seeder
+class LeerkrachtSeeder extends MyCsvSeeder
 {
 
-    /*public function __construct()
+    public function __construct()
     {
       $this->table = 'leerkrachts';
       $this->filename = base_path().'/database/seeds/csvs/leerkrachten.csv';
-    }*/
+    }
 
     /**
      * Run the database seeds.
      *
      * @return void
      */
+     /*
     public function run()
     {
         //
@@ -29,4 +30,5 @@ class LeerkrachtSeeder extends Seeder
             'actief' => 1
         ]);
     }
+    */
 }
