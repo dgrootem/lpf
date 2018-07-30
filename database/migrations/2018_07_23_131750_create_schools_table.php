@@ -17,8 +17,10 @@ class CreateSchoolsTable extends Migration
             $table->increments('id');
             $table->string('naam');
             $table->integer('lestijden_per_week');
-            $table->string('type'); //BaO ofwel BuO
+            $table->unsignedInteger('school_type_id'); //BaO ofwel BuO
             $table->timestamps();
+
+            $table->foreign('school_type_id')->references('id')->on('school_types');
         });
     }
 

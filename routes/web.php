@@ -14,3 +14,11 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/periodes/create', 'PeriodeController@create');
+Route::get('/periodes/{periode}/edit', 'PeriodeController@edit');
+
+Route::post('/periodes', 'PeriodeController@store');
+Route::patch('/periodes/{periode}', 'PeriodeController@update');
+
+Route::delete('/periodes/{periode}', 'PeriodeController@delete');

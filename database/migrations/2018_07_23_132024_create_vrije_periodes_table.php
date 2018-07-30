@@ -15,7 +15,14 @@ class CreateVrijePeriodesTable extends Migration
     {
         Schema::create('vrije_periodes', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('naam');
+            $table->date('start');
+            $table->date('stop');
+            $table->unsignedInteger('school_id')->nullable(); //NULL == geldt voor alle scholen
             $table->timestamps();
+
+            $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
+
         });
     }
 
