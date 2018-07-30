@@ -20,12 +20,14 @@ class CreatePeriodesTable extends Migration
             $table->unsignedInteger('school_id');
             $table->unsignedInteger('status_id');
             $table->unsignedInteger('leerkracht_id');
-            $table->string('type'); //ZT, RV
+            //$table->string('type'); //ZT, RV  --> zit vervat in status
             $table->smallInteger('heleDag'); //1 = HELE DAG, 0 = HALVE DAG
             $table->integer('aantal_uren_van_titularis');
+            //opdrachtbreuk van titularis =  aantal_uren_van_titularis / schooltype->noemer
 
-            $table->string('opmerking');
-            $table->unsignedInteger('user_id'); //creator van de periode
+            $table->string('opmerking')->nullable();
+            //$table->unsignedInteger('user_id'); //creator van de periode
+            // user die periode gemaakt heeft hangt vast aan school
 
             $table->timestamps();
 

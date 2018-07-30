@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\School;
 use App\Leerkracht;
 use App\Status;
+use App\Periode;
 
 class PeriodeController extends Controller
 {
@@ -45,8 +46,25 @@ class PeriodeController extends Controller
     {
         //
 
-        dd(request()->all());
-        //Periode::create(request(['start','stop','school_id','leerkracht_id',]);
+        //dd(request()->all());
+/*
+        $periode = new App\Periode;
+        $periode -> start = request('start');
+        $periode -> start = request('stop');
+        $periode -> start = request('school_id');
+        $periode -> start = request('leerkracht_id');
+*/
+        Periode::create(request(
+          ['start',
+           'stop',
+           'school_id',
+           'leerkracht_id',
+           'aantal_uren_van_titularis',
+           'status_id',
+           'opmerking',
+           'heleDag'
+         ]));
+         return view('welcome');
     }
 
     /**
