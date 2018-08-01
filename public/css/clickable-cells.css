@@ -1,0 +1,12 @@
+td.clickablecell  {
+  vertical-align: middle;
+  text-align: center;
+}
+
+
+a.fullcell {
+#  display : block;
+#  padding : 20px 10px;
+#  color   : #FFFFFF;
+#  text-decoration : none;
+}

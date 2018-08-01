@@ -16,6 +16,9 @@ class CreateSchoolsTable extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->increments('id');
             $table->string('naam');
+            $table->string('adres');
+            $table->integer('postcode');
+            $table->string('gemeente');
             $table->integer('lestijden_per_week');
             $table->unsignedInteger('school_type_id'); //BaO ofwel BuO
             $table->timestamps();

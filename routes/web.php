@@ -11,8 +11,12 @@
 |
 */
 
-Route::get('/', 'PeriodeController@defaultRange');
+Route::get('/', 'OverzichtController@defaultRange');
 
+
+Route::resource('periodes','PeriodeController');
+
+/*
 Route::get('/periodes/create/{leerkracht}', 'PeriodeController@create');
 Route::get('/periodes/{periode}/edit', 'PeriodeController@edit');
 
@@ -20,3 +24,6 @@ Route::post('/periodes', 'PeriodeController@store');
 Route::patch('/periodes/{periode}', 'PeriodeController@update');
 
 Route::delete('/periodes/{periode}', 'PeriodeController@delete');
+
+Route::resource()
+*/

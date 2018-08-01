@@ -6,7 +6,7 @@
   <tr>
     <th></th>
     @foreach ($leerkrachten as $key => $leerkracht)
-    <th><a href="/periodes/create/{{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
+    <th><a href="/periodes/create?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
     @endforeach
   </tr>
 
@@ -14,12 +14,33 @@
   @foreach ($range as $datum => $lijn)
     <tr>
       <th>{{ $datum }}</th>
-      @foreach ($lijn as $leerkrachtid => $status)
-        <td class="{{$status->visualisatie}}">{{ $status->omschrijving}} </td>
+      @foreach ($lijn as $leerkrachtid => $periode)
+        <td
+          class="{{$periode->status->visualisatie}}
+          @if (strcmp($periode->status->visualisatie,'')<>0)
+            clickablecell-{{$periode->id}}
+          @endif
+          ">
+            {{ $periode->status->omschrijving}}
+        </td>
       @endforeach
     </tr>
   @endforeach
 </table>
+
+@endsection
+
+@section('page-specific-scripts')
+<script type="text/javascript">
+$(document).ready(function () {
+  @foreach ($periodesInRange as $key => $periode)
+    $(".clickablecell-{{$periode->id}}").click(function(){
+      window.location.href = "/periodes/{{$periode->id}}/edit";
+      //alert( "Handler for .click() on periode {{$periode->id}} called." );
+    });
+  @endforeach
+});
+</script>
 
 
 @endsection

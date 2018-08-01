@@ -5,10 +5,12 @@
 
 
 <h2>Plan een periode </h2>
-{{-- ,'route' => array('periodes.store', $periode->id) --}}
-  {{ Form::model($periode, array('class' => 'col-md-6 needs-validation',
-      'route' => 'periodes.store' ))}}
+
+  {{-- {{ Form::open(array('url' => 'periodes','class' => 'col-md-6 needs-validation')) }} --}}
+  {{ Form::model($periode, array('class' => 'col-md-6 needs-validation','route' => array('periodes.update', $periode->id), 'method' => 'PUT')) }}
   {{-- <form method="POST" action="/periodes" class="col-md-6 needs-validation"> --}}
+
+    {{-- {!! method_field('patch') !!} --}}
     @include('periode.basis_top')
     <hr>
     @include('periode.startstop')
@@ -19,6 +21,7 @@
 
     @include('periode.basis_bottom')
 
-</form>
+    {{ Form::close() }}
+{{-- </form> --}}
 
 @endsection

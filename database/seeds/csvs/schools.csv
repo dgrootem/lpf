@@ -1,5 +1,10 @@
-naam,lestijden_per_week,school_type_id
-Don Bosco,11,1
-Sint Jan,15,1
-Sancta Maria,31,1
-Windekind,8,2
+naam,adres,postcode,gemeente,lestijden_per_week,school_type_id
+VBS Paridaens,Janseniusstraat 2, 3000, Leuven, 28,1
+Vrije Basisschool,Mechelsevest 2, 3000, Leuven, 25,1
+Vrije Kleuterschool,Sint-jacobsplein 13, 3000, Leuven, 11,1
+VLS HDC,Oude Markt 28, 3000, Leuven, 15,1
+Vrije Basisschool,Groenveldstraat 46, 3001, Heverlee, 29,1
+VBSBO Windekind,Schapenstraat 98, 3000, Leuven, 19,2
+VBSBO Ter Bank,Tervuursesteenweg 295, 3001, Heverlee, 19,1
+Vrije Basisschool,Charles Deberiostraat 3, 3000, Leuven, 35,1
+VLS Mater Dei,Sint-jacobsplein 15, 3000, Leuven, 16,1
