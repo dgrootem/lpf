@@ -37,31 +37,3 @@
   </div>
 </div>
 <small id="dateRangeError" class="error" aria-live="polite"></small>
-<script type="text/javascript">
-
-  var form  = document.getElementsByTagName('form')[0];
-  var start = document.getElementById('start');
-  var stop =  document.getElementById('stop');
-  var error = document.getElementById('dateRangeError');
-
-
-  form.addEventListener("submit", function (event) {
-  // Each time the user tries to send the data, we check
-  // if the email field is valid.
-  if ((!start.validity.valid) ||
-      (!stop.validity.valid)  ||
-      (stop.value < start.value))
-    {
-
-      stop.className  ="form-control is-invalid";
-      start.className ="form-control is-invalid";
-    // If the field is not valid, we display a custom
-    // error message.
-    error.innerHTML = "Stopdatum mag niet voor startdatum vallen";
-    error.className = "error text-danger";
-    // And we prevent the form from being sent by canceling the event
-    event.preventDefault();
-  }
-  }, false);
-
-</script>

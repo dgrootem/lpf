@@ -12,7 +12,7 @@
 */
 
 Route::get('/', 'OverzichtController@defaultRange');
-
+Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
 
 Route::resource('periodes','PeriodeController');
 

@@ -9,6 +9,7 @@ use App\Status;
 use App\Periode;
 
 use Carbon\Carbon;
+use Log;
 
 class PeriodeController extends Controller
 {
@@ -132,5 +133,23 @@ class PeriodeController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function checkForConflict()
+    {
+      $date = request('date');
+      $leerkracht_id = request('leerkracht_id');
+      $periode_id = request('periode_id');
+
+
+      $periode = Periode::where('leerkracht_id',$leerkracht_id)->where('start','<=',$date)->where('stop','>=',$date)->first();
+      Log::debug(compact('periode_id'));
+      if (is_null($periode))
+        $result =  true;
+      else
+        if ($periode->id == $periode_id) $result=true;
+        else $result = false;
+
+      return compact('result');
     }
 }

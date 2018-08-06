@@ -12,7 +12,7 @@
 
 
   @foreach ($range as $datum => $lijn)
-    <tr>
+    <tr @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
       <th>{{ $datum }}</th>
       @foreach ($lijn as $leerkrachtid => $periode)
         <td
