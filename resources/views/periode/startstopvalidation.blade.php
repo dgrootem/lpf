@@ -69,9 +69,9 @@ $(document).ready(function(){
   form.addEventListener("submit", function (event) {
   // Each time the user tries to send the data, we check
   // if the email field is valid.
-  if ((!start.validity.valid) ||
-      (!stop.validity.valid)  ||
-      (stop.value < start.value))
+  if ((!start[0].validity.valid) ||
+      (!stop[0].validity.valid)  ||
+      (stop.val() < start.val()))
     {
 
       stop.className  ="form-control is-invalid";
