@@ -202,7 +202,7 @@ class PeriodeController extends Controller
       $leerkracht_id = request('leerkracht_id');
       $periode_id = request('periode_id');
       $periode = $this->periodeDieDatumBevat($date,$leerkracht_id,$periode_id);
-      Log::debug(compact('periode'));
+      //Log::debug(compact('periode'));
       if ((is_null($periode)) || ($periode->status_id == $this->statusOpengesteld))
         $result =  true;
       //else
