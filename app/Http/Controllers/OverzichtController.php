@@ -86,4 +86,16 @@ class OverzichtController extends Controller
 
     return view('overzicht',compact(['range','periodesInRange','leerkrachten']));
   }
+
+  /**
+   * Create a new controller instance.
+   *
+   * @return void
+   */
+  public function __construct()
+  {
+      $this->middleware('auth');
+  }
+
+
 }

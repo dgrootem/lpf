@@ -11,6 +11,7 @@
 |
 */
 
+Route::get('/overzichten', 'OverzichtController@defaultRange');
 Route::get('/', 'OverzichtController@defaultRange');
 Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
 
@@ -27,3 +28,10 @@ Route::delete('/periodes/{periode}', 'PeriodeController@delete');
 
 Route::resource()
 */
+
+Auth::routes();
+Route::get('auth/google', 'Auth\LoginController@redirectToProvider');
+Route::get('auth/google/callback', 'Auth\LoginController@handleProviderCallback');
+
+
+Route::get('/home', 'HomeController@index')->name('home');

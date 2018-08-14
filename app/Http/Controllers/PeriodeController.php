@@ -85,7 +85,7 @@ class PeriodeController extends Controller
         $this->checkAndFix($periode);
         $periode->save();
 
-        return redirect('/');
+        return redirect('/overzichten');
     }
 
 
@@ -168,7 +168,7 @@ class PeriodeController extends Controller
         $this->fillPeriode($request,$periode);
         $this->checkAndFix($periode);
         $periode->save();
-        return redirect('/');
+        return redirect('/overzichten');
     }
 
     private function fillPeriode(Request $request,Periode $periode){
@@ -210,5 +210,15 @@ class PeriodeController extends Controller
       else $result = false;
 
       return compact('result');
+    }
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
     }
 }
