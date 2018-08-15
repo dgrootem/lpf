@@ -27,3 +27,4 @@ composer.phar
 
 
 .env
+.env.production
