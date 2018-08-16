@@ -1,7 +1,7 @@
 @section('page-specific-scripts')
 <script type="text/javascript">
 
-  var form  = document.getElementsByTagName('form')[0];
+  var form  = document.getElementById('periodeform');
   var start = $("#start");
   var stop = $("#stop");
 

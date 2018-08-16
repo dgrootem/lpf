@@ -7,7 +7,7 @@
 <h2>Plan een periode </h2>
 {{-- ,'route' => array('periodes.store', $periode->id) --}}
   {{ Form::model($periode, array('class' => 'col-md-6 needs-validation',
-      'route' => 'periodes.store' ))}}
+      'route' => 'periodes.store','id' => 'periodeform' ))}}
   {{-- <form method="POST" action="/periodes" class="col-md-6 needs-validation"> --}}
     @include('periode.basis_top')
     <hr>

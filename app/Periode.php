@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Periode extends Model
 {
@@ -17,6 +18,14 @@ class Periode extends Model
      'heleDag'
    ];
 
+
+   public function getStartAttribute($date){
+     return Carbon::parse($date)->format('Y-m-d');
+   }
+
+   public function getStopAttribute($date){
+     return Carbon::parse($date)->format('Y-m-d');
+   }
 
    public function school()
    {

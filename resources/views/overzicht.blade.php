@@ -6,7 +6,7 @@
   <tr>
     <th></th>
     @foreach ($leerkrachten as $key => $leerkracht)
-    <th><a href="/periodes/create?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
+    <th><a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
     @endforeach
   </tr>
 
@@ -35,7 +35,7 @@
 $(document).ready(function () {
   @foreach ($periodesInRange as $key => $periode)
     $(".clickablecell-{{$periode->id}}").click(function(){
-      window.location.href = "/periodes/{{$periode->id}}/edit";
+      window.location.href = "{{url('/periodes')}}/{{$periode->id}}/edit";
       //alert( "Handler for .click() on periode {{$periode->id}} called." );
     });
   @endforeach
