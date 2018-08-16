@@ -19,8 +19,12 @@
           class="{{$periode->status->visualisatie}}
           @if (strcmp($periode->status->visualisatie,'')<>0)
             clickablecell-{{$periode->id}}
+          @else
+            clickablecell-new
           @endif
-          ">
+          "
+          data-leerkracht="{{$leerkrachtid}}"
+          data-datum="{{$datum}}">
             {{ $periode->status->omschrijving}}
         </td>
       @endforeach
@@ -39,6 +43,10 @@ $(document).ready(function () {
       //alert( "Handler for .click() on periode {{$periode->id}} called." );
     });
   @endforeach
+  $(".clickablecell-new").click(function(){
+    window.location.href = "{{url('/periodes')}}/create?leerkracht="+$(this).data("leerkracht");
+    //alert( "Handler for .click() on periode {{$periode->id}} called." );
+  });
 });
 </script>
 
