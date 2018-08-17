@@ -25,6 +25,8 @@ class CreatePeriodesTable extends Migration
             $table->integer('aantal_uren_van_titularis');
             //opdrachtbreuk van titularis =  aantal_uren_van_titularis / schooltype->noemer
 
+            $table->smallInteger('deleted')->default(0);
+
             $table->string('opmerking')->nullable();
             //$table->unsignedInteger('user_id'); //creator van de periode
             // user die periode gemaakt heeft hangt vast aan school

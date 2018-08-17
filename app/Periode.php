@@ -5,6 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
+use Log;
+
 class Periode extends Model
 {
     //
@@ -20,11 +22,11 @@ class Periode extends Model
 
 
    public function getStartAttribute($date){
-     return Carbon::parse($date)->format('Y-m-d');
+     return Carbon::parse($date);//->format('Y-m-d');
    }
 
    public function getStopAttribute($date){
-     return Carbon::parse($date)->format('Y-m-d');
+     return Carbon::parse($date);//->format('Y-m-d');
    }
 
    public function school()
@@ -39,4 +41,23 @@ class Periode extends Model
    {
        return $this->belongsTo(Leerkracht::class);
    }
+
+
+   public function scopePeriodesInRange($query,$begin,$einde,$deleted){
+     return $query->where('deleted',$deleted)->where('stop','>=',$begin)->where('start','<=',$einde);
+   }
+
+   public function scopePeriodesInRangeForLeekracht($query,$begin,$einde,$leerkracht_id,$zelf,$deleted){
+     return Periode::periodesInRange($begin,$einde,$deleted)->where('id','<>',$zelf)->where('leerkracht_id',$leerkracht_id);
+   }
+
+   function scopeOpenPeriodesInRangeForLeerkracht($query,$start,$stop,$leerkracht_id,$mezelf){
+     return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,0)->where('status_id',Status::opengesteld());
+   }
+
+   function scopeDeletedPeriodesInRangeForLeerkracht($query,$start,$stop,$leerkracht_id,$mezelf){
+     return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,1);
+
+   }
+
 }

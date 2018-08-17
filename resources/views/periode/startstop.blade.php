@@ -2,9 +2,8 @@
   <div class="form-group col-md-6">
 
     {{Form::label('start','Start')}}
-    {{Form::date('start',NULL,/*Request::old('start')*///$periode->start,
+    {{Form::date('start',NULL,
       array('min' => '2018-07-01','max'=>'2019-06-30',
-            // 'data-date-format' => 'dddd DD MM YYYY',
             'class' => 'form-control')) }}
             {{-- {{Form::text('start',Request::old('start'))}} --}}
 
@@ -24,7 +23,7 @@
   <div class="form-group col-md-6">
     {{-- <label for"stop">Einde</label> --}}
     {{Form::label('stop','Stop')}}
-    {{Form::date('stop',NULL,/*Request::old('start')*///$periode->start,
+    {{Form::date('stop',NULL,
       array('min' => '2018-07-01','max'=>'2019-06-30',
             // 'data-date-format' => 'dddd DD MM YYYY',
             'class' => 'form-control')) }}

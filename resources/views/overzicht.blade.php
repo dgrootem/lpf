@@ -13,7 +13,7 @@
 
   @foreach ($range as $datum => $lijn)
     <tr @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
-      <th>{{ $datum }}</th>
+      <th>{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
       @foreach ($lijn as $leerkrachtid => $periode)
         <td
           class="{{$periode->status->visualisatie}}
@@ -24,7 +24,8 @@
           @endif
           "
           data-leerkracht="{{$leerkrachtid}}"
-          data-datum="{{$datum}}">
+          data-datum="{{$datum}}"
+          title="{{$periode->opmerking}}">
             {{ $periode->status->omschrijving}}
         </td>
       @endforeach
@@ -38,13 +39,16 @@
 <script type="text/javascript">
 $(document).ready(function () {
   @foreach ($periodesInRange as $key => $periode)
+    $(".clickablecell-{{$periode->id}}").tooltip({show: {delay: 800}, track: true});
     $(".clickablecell-{{$periode->id}}").click(function(){
       window.location.href = "{{url('/periodes')}}/{{$periode->id}}/edit";
       //alert( "Handler for .click() on periode {{$periode->id}} called." );
     });
   @endforeach
   $(".clickablecell-new").click(function(){
-    window.location.href = "{{url('/periodes')}}/create?leerkracht="+$(this).data("leerkracht");
+    window.location.href = "{{url('/periodes')}}/create?leerkracht="
+                          +$(this).data("leerkracht")
+                          +"&datum="+$(this).data("datum");
     //alert( "Handler for .click() on periode {{$periode->id}} called." );
   });
 });
