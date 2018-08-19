@@ -32,5 +32,11 @@ class StatusSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
+        DB::table('statuses')->insert([
+            'omschrijving' => 'geannuleerd',
+            'visualisatie' => 'alert-secondary',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 }

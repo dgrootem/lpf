@@ -34,11 +34,13 @@ class PeriodeController extends Controller
     {
 
         $leerkracht = Leerkracht::find(request('leerkracht'));
+        $datum = request("datum");
+        if (is_null($datum)) $datum = Carbon::today();
         $periode = new Periode;
         $periode->school_id = 1;
         $periode->leerkracht_id = $leerkracht->id;
-        $periode->start = Carbon::today();
-        $periode->stop = Carbon::today();
+        $periode->start = $datum;
+        $periode->stop = $datum;
 
 
         $school = School::find(1);
@@ -57,77 +59,13 @@ class PeriodeController extends Controller
      */
     public function store(Request $request)
     {
-        //
-
-        //dd(request()->all());
-/*
-        $periode = new App\Periode;
-        $periode -> start = request('start');
-        $periode -> start = request('stop');
-        $periode -> start = request('school_id');
-        $periode -> start = request('leerkracht_id');
-*/
         $periode = new Periode;
         $this->fillPeriode($request,$periode);
-        /*
-        Periode::create(request(
-          ['start',
-           'stop',
-           'school_id',
-           'leerkracht_id',
-           'aantal_uren_van_titularis',
-           'status_id',
-           'opmerking',
-           'heleDag'
-         ]));
-        */
 
         $this->checkAndFix($periode);
         $periode->save();
 
         return redirect('/overzichten');
-    }
-
-
-    private $statusOpengesteld = null;
-
-    function checkAndFix($periodeToCheckFor){
-      //check eerst of de start in een bestaande opengestelde periode valt
-      if (is_null($this->statusOpengesteld))
-      $this->statusOpengesteld = Status::where('omschrijving','opengesteld')->first()->id;
-
-      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->start,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-      if (!is_null($periode)){
-        if ($periode->status_id != $this->statusOpengesteld) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
-        //overlap met bestaande opengestelde periode -> aanpassen door deze vroeger te laten stoppen
-        $periode->stop = clone $periodeToCheckFor->start;
-        $periode->stop->addDays(-1);
-        $periode->save();
-      }
-
-      //doe nu hetzelfde voor de stopdatum
-      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->stop,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-      if (!is_null($periode)){
-        if ($periode->status_id != $this->statusOpengesteld) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
-        //overlap met bestaande opengestelde periode -> aanpassen door deze later te laten starten
-        $periode->start = clone $periodeToCheckFor->stop;
-        $periode->start->addDays(1);
-        $periode->save();
-      }
-
-    }
-
-    function periodeDieDatumBevat($date,$leerkracht_id,$mezelf){
-
-      //Log::debug(compact('periode_id','leerkracht_id','date','statusOpengesteld'));
-
-      $periode = Periode::where('id','<>',$mezelf)  //exclude matching with myself when editing a period
-                    ->where('leerkracht_id',$leerkracht_id)
-                    //->where('status_id','<>',$statusOpengesteld) //
-                    ->where('start','<=',$date)
-                    ->where('stop','>=',$date)->first();
-
-      return $periode;
     }
 
     /**
@@ -191,25 +129,154 @@ class PeriodeController extends Controller
     public function destroy($id)
     {
         //
+        $periode = Periode::find($id);
+        $periode->delete();
+        return redirect('/overzichten');
     }
+
+
+    // -------------------- HELPER FUNCTIONS --------------------
+    private function checkDatumInPeriodeConflict($date,$startstop,$leerkracht_id,$periode_id)
+    {
+      $periode = $this->periodeDieDatumBevat($date,$leerkracht_id,$periode_id);
+      if (!((is_null($periode)) || ($periode->status_id == Status::opengesteld())))
+        return $startstop . "in bestaande periode";
+      else
+        return null;
+    }
+
 
     public function checkForConflict()
     {
-      if (is_null($this->statusOpengesteld))
-      $this->statusOpengesteld = Status::where('omschrijving','opengesteld')->first()->id;
-
-      $date = request('date');
+      $datestart = request('datestart');
+      $datestop = request('datestop');
       $leerkracht_id = request('leerkracht_id');
       $periode_id = request('periode_id');
-      $periode = $this->periodeDieDatumBevat($date,$leerkracht_id,$periode_id);
-      //Log::debug(compact('periode'));
-      if ((is_null($periode)) || ($periode->status_id == $this->statusOpengesteld))
-        $result =  true;
-      //else
-      //  if ($periode->id == $periode_id) $result=true;
-      else $result = false;
+
+      $result = $this->checkDatumInPeriodeConflict($datestart,"Start",$leerkracht_id,$periode_id);
+      if (!is_null($result)) return compact('result');
+
+      $result = $this->checkDatumInPeriodeConflict($datestop,"Stop",$leerkracht_id,$periode_id);
+      if (!is_null($result)) return compact('result');
+
+      $periodes = Periode::periodesInRange($datestart,$datestop,$leerkracht_id,$periode_id,0)->get();
+      if (!$periodes->isEmpty())
+        $result = "De nieuwe periode omvat 1 of meerdere niet-beschikbare periodes";
+      else
+        $result = null;
 
       return compact('result');
+    }
+
+
+
+    function checkAndFix($periodeToCheckFor){
+      $oudePeriode = Periode::find($periodeToCheckFor->id);
+
+
+
+      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->start,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
+      if (!is_null($periode)){
+        if ($periode->status_id != Status::opengesteld()) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
+        //ALS de stop valt na de stop van de al bestaande periode -> splits de bestaande periode
+        if ($periode->stop >= $periodeToCheckFor->stop)
+        {
+          $nieuwePeriode = $periode->replicate();
+          $newstart = clone $periodeToCheckFor->stop;
+          $newstart->addDays(1);
+          $nieuwePeriode->start= $newstart;
+          $nieuwePeriode->save();
+          // Log::debug("Created new periode: ");
+          // Log::debug(compact('nieuwePeriode'));
+        }
+
+        //overlap met bestaande opengestelde periode -> aanpassen door deze vroeger te laten stoppen
+        $newstop = clone $periodeToCheckFor->start;
+        $newstop->addDays(-1);
+        $periode->stop =  $newstop;
+        // Log::debug("Modified stop of periode to " . $periode->stop);
+        // Log::debug(compact('periode'));
+        $periode->save();
+      }
+
+      //doe nu hetzelfde voor de stopdatum
+      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->stop,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
+      if (!is_null($periode)){
+        if ($periode->status_id != Status::opengesteld()) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
+        //overlap met bestaande opengestelde periode -> aanpassen door deze later te laten starten
+        $newstart = clone $periodeToCheckFor->stop;
+        $newstart->addDays(1);
+        $periode->start = $newstart;
+        Log::debug("Modified start of periode to " . $periode->start);
+        Log::debug(compact('periode'));
+        $periode->save();
+      }
+
+      //check of de periode waarvoor we checks doen andere periodes bevat
+      //deze moeten dan verwijderd worden
+      $periodes = Periode::openPeriodesInRangeForLeerkracht($periodeToCheckFor->start,
+                                                            $periodeToCheckFor->stop,
+                                                            $periodeToCheckFor->leerkracht_id,
+                                                            $periodeToCheckFor->id
+                                                            )->get();
+      Log::debug(compact('periodes'));
+
+      foreach ($periodes as $key => $thePeriode) {
+        $thePeriode->deleted = 1;
+        $thePeriode->save();
+      }
+
+      //check of de periode gekrompen is en oude 'verwijderde' opengestelde periodes terug vrijgeeft
+      if (!is_null($oudePeriode)){
+        $oudestart = $oudePeriode->start;
+        $oudestop = $oudePeriode->stop;
+        if ($oudestart < $periodeToCheckFor->start)
+        {
+          $end= Carbon::parse($periodeToCheckFor->start);
+          $end->addDays(-1);
+          $this->resetPeriodesInRange($oudestart,$end,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
+        }
+        if ($periodeToCheckFor->stop < $oudestop){
+          $begin= Carbon::parse($periodeToCheckFor->stop);
+          $begin->addDays(1);
+          $this->resetPeriodesInRange($begin,$oudestop,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
+        }
+      }
+    }
+
+    function resetPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
+      $periodes = Periode::deletedPeriodesInRangeForLeerkracht($start,$stop,$leerkracht_id,$mezelf)->get();
+      foreach ($periodes as $key => $thePeriode) {
+        $thePeriode->deleted = 0;
+        $thePeriode->save();
+      }
+    }
+/*
+    function deletedPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
+      return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,1)
+                    ->get();
+    }
+
+    function openPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
+      $periodes = Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf)
+                    ->where('status_id',Status::opengesteld()) //
+                    ->get();
+      return $periodes;
+    }
+
+    function ingenomenPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
+      $periodes = Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf)
+                    ->where('status_id','<>',Status::opengesteld()) //
+                    ->get();
+      return $periodes;
+    }
+*/
+    function periodeDieDatumBevat($date,$leerkracht_id,$mezelf){
+      $periode = Periode::where('id','<>',$mezelf)  //exclude matching with myself when editing a period
+                    ->where('leerkracht_id',$leerkracht_id)
+                    ->where('start','<=',$date)
+                    ->where('stop','>=',$date)->first();
+      return $periode;
     }
 
     /**
@@ -220,5 +287,6 @@ class PeriodeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+
     }
 }

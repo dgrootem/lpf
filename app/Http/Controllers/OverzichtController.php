@@ -50,17 +50,9 @@ class OverzichtController extends Controller
       $range[Carbon::today()->addDays($i)->formatLocalized($format)] = $tempArray;
     }
 
-    //return compact('today','endRange','range');
-
-    /*$periodesInRange = Periode::whereBetween('stop',[$today,$endRange])
-                      ->orWhereBetween('start',[$today,$endRange])->get();
-                      //->orWhere('start','<=',$today)->where('stop','>=',$endRange)->get();*/
-    $periodesInRange = Periode::where('stop','>=',Carbon::today()->format('Y-m-d'))
-    ->where('start','<=',$endRange->format('Y-m-d'))->get();
-
-
-
-    //return compact('today','endRange','periodesInRange');
+    $periodesInRange = Periode::periodesInRange(Carbon::today()->format('Y-m-d'),
+                                                $endRange->format('Y-m-d'),
+                                                0)->get();
 
     foreach ($periodesInRange as $key => $periode) {
       $ps=$periode->start;

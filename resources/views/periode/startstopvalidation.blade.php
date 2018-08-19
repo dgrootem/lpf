@@ -12,52 +12,75 @@
 $(document).ready(function(){
 
 
-  function checkForConflict(date,leerkracht_id,periode_id){
+  function checkForConflict(periode_id){
 
     return $.ajax({
       url: "{{ url('/periodes/checkForConflict') }}",
       method: 'post',
       data: {
          _token : '{{ csrf_token() }}',
-         date: date,
-         leerkracht_id: leerkracht_id,
+         datestart: start.val(),
+         datestop: stop.val(),
+         leerkracht_id: {{$periode->leerkracht->id}},
          periode_id: periode_id
-      }/*,
+      },
       success: function(result){
          console.log(result);
       },
       failure: function(result){
-
-      }*/
+        console.log(result);
+      }
     });
-/*
-      $.ajax({
-         type:'POST',
-         url:'/periodes/checkForConflict',
-         data:{,date: date,leerkracht_id: leerkracht_id},
-         success:function(data){
-            return data;
-         }
-
-      });
-*/
   }
+
+  function disableSubmit(){
+    $('#mysubmit').attr("disabled", "disabled");
+  }
+
+  function clearError(){
+    error.innerHTML = "";
+    error.className = "error";
+    enableSubmit();
+  }
+
+  function enableSubmit(){
+    $('#mysubmit').removeAttr("disabled");
+  }
+
+
 
   function addValueCheck(element){
     element.on('change',function(){
+      if ((!start[0].validity.valid) ||
+          (!stop[0].validity.valid)  ||
+          (stop.val() < start.val()))
+      {
 
-      checkForConflict(element.val(),$("input[name=leerkracht_id]").val(),{{$periode->id}}  ).done(function(data){
-        if (data.result==false){
+        stop.addClass("is-invalid");
+        start.addClass("is-invalid");
+        // If the field is not valid, we display a custom
+        // error message.
+        error.innerHTML = "Stopdatum mag niet voor startdatum vallen";
+        error.className = "error text-danger";
+        disableSubmit();
+        return;
+      }
+      else {
+        stop.removeClass("is-invalid");
+        start.removeClass("is-invalid");
+        clearError();
+      }
+      checkForConflict({{$periode->id}}).done(function(data){
+        if (data.result!=null){
           element.addClass("is-invalid");
-          error.innerHTML = element.attr('name') + "datum ligt in bestaande periode";
+          error.innerHTML = data.result;
           error.className = "error text-danger";
-          $('#mysubmit').attr("disabled", "disabled");
+          disableSubmit();
         }
         else {
           element.removeClass("is-invalid")
-          error.innerHTML = "";
-          error.className = "error";
-          $('#mysubmit').removeAttr("disabled");
+          clearError();
+
         }
       });
     });
@@ -66,24 +89,11 @@ $(document).ready(function(){
   addValueCheck(start);
   addValueCheck(stop);
 
-  form.addEventListener("submit", function (event) {
-  // Each time the user tries to send the data, we check
-  // if the email field is valid.
-  if ((!start[0].validity.valid) ||
-      (!stop[0].validity.valid)  ||
-      (stop.val() < start.val()))
-    {
+  $(".delete").on("click", function(e){
+      return confirm("U gaat deze periode verwjderen. Bent u zeker?");
+    });
 
-      stop.className  ="form-control is-invalid";
-      start.className ="form-control is-invalid";
-    // If the field is not valid, we display a custom
-    // error message.
-    error.innerHTML = "Stopdatum mag niet voor startdatum vallen";
-    error.className = "error text-danger";
-    // And we prevent the form from being sent by canceling the event
-    event.preventDefault();
-  }
-  }, false);
 });
+
 </script>
 @endsection
