@@ -14,6 +14,7 @@ class Periode extends Model
      'stop',
      'school_id',
      'leerkracht_id',
+     'ambt_id',
      'aantal_uren_van_titularis',
      'status_id',
      'opmerking',
@@ -40,6 +41,11 @@ class Periode extends Model
    public function leerkracht()
    {
        return $this->belongsTo(Leerkracht::class);
+   }
+
+   public function ambt()
+   {
+       return $this->belongsTo(Ambt::class);
    }
 
 

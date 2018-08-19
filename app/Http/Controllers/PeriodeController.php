@@ -7,6 +7,7 @@ use App\School;
 use App\Leerkracht;
 use App\Status;
 use App\Periode;
+use App\Ambt;
 
 use Carbon\Carbon;
 use Log;
@@ -41,14 +42,15 @@ class PeriodeController extends Controller
         $periode->leerkracht_id = $leerkracht->id;
         $periode->start = $datum;
         $periode->stop = $datum;
-
+        $periode->ambt = $leerkracht->ambt;
 
         $school = School::find(1);
 
         $periode->aantal_uren_van_titularis = $school->school_type->noemer;
+        $ambts = Ambt::pluck('naam','id');
 
-        $statuses = Status::all();
-        return view('periode.create',compact('periode','statuses'));
+        $statuses = Status::where('choosable',1)->get();
+        return view('periode.create',compact('periode','statuses','ambts'));
     }
 
     /**

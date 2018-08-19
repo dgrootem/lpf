@@ -23,6 +23,7 @@ class CreatePeriodesTable extends Migration
             //$table->string('type'); //ZT, RV  --> zit vervat in status
             $table->smallInteger('heleDag'); //1 = HELE DAG, 0 = HALVE DAG
             $table->integer('aantal_uren_van_titularis');
+            $table->string('ambt');
             //opdrachtbreuk van titularis =  aantal_uren_van_titularis / schooltype->noemer
 
             $table->smallInteger('deleted')->default(0);

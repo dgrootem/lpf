@@ -1,14 +1,14 @@
-naam,ambt,lestijden_per_week,vaste_school_id,actief
-Alex Terieur,LS,15,2,1
-Alain Terieur,LS,11,1,1
-Magda Nuwelle,KS,7,1,1
-Ka Bouter,LS,24,7,1
-Alain Provist,KS,12,5,1
-Theo Retisch,LS,18,9,1
-Pol Stok,KS,22,4,1
-Linde Vandenbosch,LS,22,7,1
-Els Vandenbosch,LS,24,8,1
-Margriet Vandevelde,KS,12,1,1
-Roos Vandevelde,KS,18,2,1
-Pier Aat,KS,16,2,1
-Ho Ren Dol,LS,24,5,1
+naam,ambt_id,lestijden_per_week,vaste_school_id,actief
+Alex Terieur,1,15,2,1
+Alain Terieur,1,11,1,1
+Magda Nuwelle,2,7,1,1
+Ka Bouter,1,24,7,1
+Alain Provist,2,12,5,1
+Theo Retisch,1,18,9,1
+Pol Stok,2,22,4,1
+Linde Vandenbosch,1,22,7,1
+E1 Vandenbosch,1,24,8,1
+Margriet Vandevelde,2,12,1,1
+Roos Vandevelde,2,18,2,1
+Pier Aat,2,16,2,1
+Ho Ren Dol,1,24,5,1

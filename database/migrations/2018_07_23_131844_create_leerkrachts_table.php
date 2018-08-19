@@ -16,13 +16,14 @@ class CreateLeerkrachtsTable extends Migration
         Schema::create('leerkrachts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('naam');
-            $table->string('ambt');
+            $table->unsignedInteger('ambt_id');
             $table->string('lestijden_per_week');
             $table->unsignedInteger('vaste_school_id');
             $table->smallInteger('actief'); // ja / nee
             $table->timestamps();
 
             $table->foreign('vaste_school_id')->references('id')->on('schools');
+            $table->foreign('ambt_id')->references('id')->on('ambts');
         });
     }
 
