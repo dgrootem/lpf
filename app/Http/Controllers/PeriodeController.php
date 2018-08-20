@@ -90,8 +90,11 @@ class PeriodeController extends Controller
     public function edit(Periode $periode)
     {
         //return compact('periode');
-        $statuses = Status::all();
-        return view('periode.edit',compact(['periode','statuses']));
+        $statuses = Status::where('choosable',1)->get();
+        $ambts = Ambt::pluck('naam','id');
+        Log::debug('edit route');
+        Log::debug(compact('periode'));
+        return view('periode.edit',compact(['periode','statuses','ambts']));
     }
 
     /**
@@ -111,15 +114,22 @@ class PeriodeController extends Controller
         return redirect('/overzichten');
     }
 
+    function fromRequest($name){
+      $value = request($name);
+      Log::debug(compact('name','value'));
+      return $value;
+    }
+
     private function fillPeriode(Request $request,Periode $periode){
-      $periode->start = Carbon::parse(request('start'));
-      $periode->stop = Carbon::parse(request('stop'));
-      $periode->school_id = request('school_id');
-      $periode->leerkracht_id = request('leerkracht_id');
-      $periode->aantal_uren_van_titularis = request('aantal_uren_van_titularis');
-      $periode->status_id = request('status_id');
-      $periode->opmerking = request('opmerking');
-      $periode->heleDag = request('heleDag');
+      $periode->start = Carbon::parse($this->fromRequest('start'));
+      $periode->stop = Carbon::parse($this->fromRequest('stop'));
+      $periode->school_id = $this->fromRequest('school_id');
+      $periode->leerkracht_id = $this->fromRequest('leerkracht_id');
+      $periode->aantal_uren_van_titularis = $this->fromRequest('aantal_uren_van_titularis');
+      $periode->status_id = $this->fromRequest('status_id');
+      $periode->opmerking = $this->fromRequest('opmerking');
+      $periode->heleDag = $this->fromRequest('heleDag');
+      $periode->ambt = $this->fromRequest('ambt');
     }
 
     /**

@@ -1,38 +1,38 @@
 @extends('layouts.master')
 
 @section('content')
-
-<table class="table">
-  <tr>
-    <th></th>
-    @foreach ($leerkrachten as $key => $leerkracht)
-    <th><a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
-    @endforeach
-  </tr>
-
-
-  @foreach ($range as $datum => $lijn)
-    <tr @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
-      <th>{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
-      @foreach ($lijn as $leerkrachtid => $periode)
-        <td
-          class="{{$periode->status->visualisatie}}
-          @if (strcmp($periode->status->visualisatie,'')<>0)
-            clickablecell-{{$periode->id}}
-          @else
-            clickablecell-new
-          @endif
-          "
-          data-leerkracht="{{$leerkrachtid}}"
-          data-datum="{{$datum}}"
-          title="{{$periode->opmerking}}">
-            {{ $periode->status->omschrijving}}
-        </td>
+<div class="container-fluid">
+  <table class="table">
+    <tr>
+      <th></th>
+      @foreach ($leerkrachten as $key => $leerkracht)
+      <th><a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
       @endforeach
     </tr>
-  @endforeach
-</table>
 
+
+    @foreach ($range as $datum => $lijn)
+      <tr @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
+        <th>{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
+        @foreach ($lijn as $leerkrachtid => $periode)
+          <td
+            class="{{$periode->status->visualisatie}}
+            @if (strcmp($periode->status->visualisatie,'')<>0)
+              clickablecell-{{$periode->id}}
+            @else
+              clickablecell-new
+            @endif
+            "
+            data-leerkracht="{{$leerkrachtid}}"
+            data-datum="{{$datum}}"
+            title="{{$periode->opmerking}}">
+              {{ $periode->status->omschrijving}}
+          </td>
+        @endforeach
+      </tr>
+    @endforeach
+  </table>
+</div>
 @endsection
 
 @section('page-specific-scripts')
