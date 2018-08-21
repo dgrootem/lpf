@@ -1,8 +1,9 @@
 
 
-{{ Form::hidden('school_id', Request::old('periode->school_id')) }}
-{{ Form::hidden('leerkracht_id', Request::old('periode->leerkracht_id')) }}
-<input type="hidden" name="heleDag" value="1">
+<!-- {{ Form::hidden('school_id', Request::old('periode->school_id')) }} -->
+<!-- {{ Form::hidden('leerkracht_id', Request::old('periode->leerkracht_id')) }} -->
+
+<!-- <input type="hidden" name="heleDag" value="1">
 <div class="form-row">
   <div class="form-group col">
     <div class="card">
@@ -11,9 +12,11 @@
         <p class="card-text">
           <div class="form-row alert-primary ">
             <div class="col strong">
-              {{ Form::label('', 'Leerkracht') }}
+
+              <label for="leerkracht">Leerkracht</label>
             </div>
             <div class="col">
+              <label for=""></label>
               {{Form::label('leerkracht',$periode->leerkracht->naam) }}
             </div>
           </div>
@@ -30,4 +33,4 @@
       </p>
     </div>
   </div>
-</div>
+</div> -->

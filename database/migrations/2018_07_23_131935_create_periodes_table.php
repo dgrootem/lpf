@@ -32,6 +32,8 @@ class CreatePeriodesTable extends Migration
             //$table->unsignedInteger('user_id'); //creator van de periode
             // user die periode gemaakt heeft hangt vast aan school
 
+            $table->integer('berekendeUren');
+
             $table->timestamps();
 
             $table->foreign('school_id')->references('id')->on('schools');

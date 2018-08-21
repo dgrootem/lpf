@@ -18,11 +18,11 @@ class CreateLeerkrachtsTable extends Migration
             $table->string('naam');
             $table->unsignedInteger('ambt_id');
             $table->string('lestijden_per_week');
-            $table->unsignedInteger('vaste_school_id');
+            //$table->unsignedInteger('vaste_school_id');
             $table->smallInteger('actief'); // ja / nee
             $table->timestamps();
 
-            $table->foreign('vaste_school_id')->references('id')->on('schools');
+            //$table->foreign('vaste_school_id')->references('id')->on('schools');
             $table->foreign('ambt_id')->references('id')->on('ambts');
         });
     }

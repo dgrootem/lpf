@@ -12,4 +12,8 @@ class Leerkracht extends Model
     {
         return $this->belongsTo(Ambt::class);
     }
+
+    public function schools(){
+      return $this->belongsToMany(School::class);
+    }
 }

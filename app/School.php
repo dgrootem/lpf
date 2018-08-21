@@ -11,4 +11,12 @@ class School extends Model
     {
         return $this->belongsTo(SchoolType::class);
     }
+
+    public function leerkrachts(){
+      return $this->belongsToMany(Leerkracht::class);
+    }
+
+    public function users(){
+      return $this->belongsToMany(User::class);
+    }
 }

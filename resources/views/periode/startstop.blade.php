@@ -32,6 +32,7 @@
           </div>
         </p>
         <small id="dateRangeError" class="error" aria-live="polite"></small>
+        <div id="berekenUren" class="error" aria-live="polite"></div>
       </div>
     </div>
   </div>

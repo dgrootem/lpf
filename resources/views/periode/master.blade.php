@@ -6,16 +6,16 @@
     <div class="col">
 
       @yield('form_open')
-
-      {{ Form::hidden('school_id', $periode->school_id) }}
-      {{ Form::hidden('leerkracht_id', $periode->leerkracht_id) }}
+      <input type="hidden" name="school_id" value="{{$periode->school_id or old('school_id')}}">
+      <input type="hidden" name="leerkracht_id" value="{{$periode->leerkracht_id or old('leerkracht_id')}}">
       <input type="hidden" name="heleDag" value="1">
+      <input type="hidden" name="periode_id" value="{{$periode->id}}">
 
-      <!-- @include('periode.basis_top') -->
-      <h2 class="text-center"><span class="badge badge-primary">Plan een periode voor
-        {{Form::label('leerkracht',$periode->leerkracht->naam, ['class' => 'badge badge-light']) }}
-        in {{ Form::label('school', $periode->school->naam, ['class' => 'badge badge-light']) }}
-      </span></h2>
+      <h2 class="text-center">
+        <span class="badge badge-primary">
+          Plan een periode voor <span class="badge badge-light">{{$periode->leerkracht->naam}}</span> in <span class="badge badge-light">{{$periode->school->naam}}</span>
+        </span>
+      </h2>
 
       <br>
       <div class="form-row">

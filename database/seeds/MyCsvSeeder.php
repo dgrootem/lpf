@@ -17,6 +17,7 @@ class MyCsvSeeder extends CsvSeeder
         //
         // Recommended when importing larger CSVs
         DB::disableQueryLog();
+        Log::debug('Starting import');
 
         // Uncomment the below to wipe the table clean before populating
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');

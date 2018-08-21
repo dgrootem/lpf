@@ -12,9 +12,10 @@
                    value="{{$status->id}}"
                    @if ($periode->status_id == $status->id) checked @endif
                    >
-            <label class="form-check-label " for="status_id">
+            <label class="form-check-label" for="{{ 'type_vervanging'.$status->omschrijving }}">
               {{ $status->omschrijving }}
             </label>
+          </input>
           </div>
         @endforeach
       </p>

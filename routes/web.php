@@ -13,7 +13,7 @@
 
 Route::get('/overzichten', 'OverzichtController@defaultRange');
 Route::get('/', 'OverzichtController@defaultRange');
-Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
+
 
 Route::resource('periodes','PeriodeController');
 
@@ -35,3 +35,7 @@ Route::get('auth/google/callback', 'Auth\LoginController@handleProviderCallback'
 
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+//TODO: move to API-routes
+Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
+Route::post('/periodes/calculateUren','PeriodeController@calculateUren');

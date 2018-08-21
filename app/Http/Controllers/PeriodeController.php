@@ -92,8 +92,8 @@ class PeriodeController extends Controller
         //return compact('periode');
         $statuses = Status::where('choosable',1)->get();
         $ambts = Ambt::pluck('naam','id');
-        Log::debug('edit route');
-        Log::debug(compact('periode'));
+        //Log::debug('edit route');
+        //Log::debug(compact('periode'));
         return view('periode.edit',compact(['periode','statuses','ambts']));
     }
 
@@ -116,11 +116,12 @@ class PeriodeController extends Controller
 
     function fromRequest($name){
       $value = request($name);
-      Log::debug(compact('name','value'));
+      //Log::debug(compact('name','value'));
       return $value;
     }
 
     private function fillPeriode(Request $request,Periode $periode){
+
       $periode->start = Carbon::parse($this->fromRequest('start'));
       $periode->stop = Carbon::parse($this->fromRequest('stop'));
       $periode->school_id = $this->fromRequest('school_id');
@@ -130,6 +131,11 @@ class PeriodeController extends Controller
       $periode->opmerking = $this->fromRequest('opmerking');
       $periode->heleDag = $this->fromRequest('heleDag');
       $periode->ambt = $this->fromRequest('ambt');
+      $uren = $this->calculateUren()['uren'];
+
+      Log::debug('Uren=');
+      Log::debug($uren);
+      $periode->berekendeUren = $uren;
     }
 
     /**
@@ -185,8 +191,6 @@ class PeriodeController extends Controller
     function checkAndFix($periodeToCheckFor){
       $oudePeriode = Periode::find($periodeToCheckFor->id);
 
-
-
       $periode = $this->periodeDieDatumBevat($periodeToCheckFor->start,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
       if (!is_null($periode)){
         if ($periode->status_id != Status::opengesteld()) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
@@ -198,16 +202,12 @@ class PeriodeController extends Controller
           $newstart->addDays(1);
           $nieuwePeriode->start= $newstart;
           $nieuwePeriode->save();
-          // Log::debug("Created new periode: ");
-          // Log::debug(compact('nieuwePeriode'));
         }
 
         //overlap met bestaande opengestelde periode -> aanpassen door deze vroeger te laten stoppen
         $newstop = clone $periodeToCheckFor->start;
         $newstop->addDays(-1);
         $periode->stop =  $newstop;
-        // Log::debug("Modified stop of periode to " . $periode->stop);
-        // Log::debug(compact('periode'));
         $periode->save();
       }
 
@@ -219,8 +219,6 @@ class PeriodeController extends Controller
         $newstart = clone $periodeToCheckFor->stop;
         $newstart->addDays(1);
         $periode->start = $newstart;
-        Log::debug("Modified start of periode to " . $periode->start);
-        Log::debug(compact('periode'));
         $periode->save();
       }
 
@@ -231,8 +229,6 @@ class PeriodeController extends Controller
                                                             $periodeToCheckFor->leerkracht_id,
                                                             $periodeToCheckFor->id
                                                             )->get();
-      Log::debug(compact('periodes'));
-
       foreach ($periodes as $key => $thePeriode) {
         $thePeriode->deleted = 1;
         $thePeriode->save();
@@ -263,32 +259,79 @@ class PeriodeController extends Controller
         $thePeriode->save();
       }
     }
-/*
-    function deletedPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
-      return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,1)
-                    ->get();
-    }
 
-    function openPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
-      $periodes = Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf)
-                    ->where('status_id',Status::opengesteld()) //
-                    ->get();
-      return $periodes;
-    }
-
-    function ingenomenPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
-      $periodes = Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf)
-                    ->where('status_id','<>',Status::opengesteld()) //
-                    ->get();
-      return $periodes;
-    }
-*/
     function periodeDieDatumBevat($date,$leerkracht_id,$mezelf){
       $periode = Periode::where('id','<>',$mezelf)  //exclude matching with myself when editing a period
                     ->where('leerkracht_id',$leerkracht_id)
                     ->where('start','<=',$date)
                     ->where('stop','>=',$date)->first();
       return $periode;
+    }
+
+    //TODO: herschalen wanneer LPF-leerkracht in ander systeem werkt dan aantal_uren_van_titularis:
+    //  bijvoorbeeld: titularis werkt in BaO in /24, LPF in /22, dan is 19/24 te herschalen naar 17,5/22 ??
+    // TODO: wat met onvolledige weken? hoe worden dan woensdagen geteld?
+    //  bijv
+    //    iemand die vervanging doet op maandag -> woensdag? is dat 3 dagen aan 24/24 ?
+    //    iemand die vervanging doet op woensdag alleen? zou 1 dag aan 12/24 zijn...
+    //    iemand die vervanging doet van donderdag tot dinsdag? 4 dagen aan 24/24 ?
+    function calculateUren()
+    {
+      Log::debug(request()->all());
+      $datestart = Carbon::parse($this->fromRequest('start'));
+      $datestop = Carbon::parse($this->fromRequest('stop'));
+      $opdrachtBreuk = $this->fromRequest('aantal_uren_van_titularis');
+      $leerkracht_id = $this->fromRequest('leerkracht_id');
+      $school_id = $this->fromRequest('school_id');
+      $status = $this->fromRequest('status_id');
+      $periode_id = $this->fromRequest('periode_id');
+
+      return $this->berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id);
+    }
+
+    function berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id)
+    {
+      Log::debug('status=' . $status);
+      if ($status == Status::opengesteld()){
+
+        $result = "";
+        $uren = 0;
+      }
+      else{
+
+
+        $dagen = $this->calculateNbDays($datestart,$datestop);
+        Log::debug('dagen='.$dagen);
+        $leerkracht = Leerkracht::find($leerkracht_id);
+        $school = School::find($school_id);
+
+        //TODO: goed uitschrijven welke checks hier zouden kunnen achterzitten, zeer complex!!
+        /*
+        $begin = new Carbon;
+        $begin->setISODate($datestart->year,$datestart->weekOfYear);
+        $andere_periodes = Periode::periodesInRangeForLeekracht($begin,$einde,$leerkracht_id,$periode_id,0);
+        */
+        $result = null;
+        /*if ($leerkracht->lestijden_per_week < $opdrachtBreuk)
+          $result =  "OPGELET: Leerkracht heeft minder uren (" .
+                      $leerkracht->lestijden_per_week .
+                      ") dan gewenste opdracht (" . $opdrachtBreuk.")" ;
+                      */
+        Log::debug('aantal_uren_van_titularis='.$opdrachtBreuk);
+        Log::debug('lestijden_per_week LPF='.$leerkracht->lestijden_per_week);
+        Log::debug('minimum='.(min($opdrachtBreuk,$leerkracht->lestijden_per_week)));
+        $uren = $dagen * min($opdrachtBreuk,$leerkracht->lestijden_per_week);
+      }
+      return compact('result','uren');
+    }
+
+    // TODO: uitfilteren van vrije periodes
+    function calculateNbDays($d1,$d2){
+      $werkdagen = $d1->diffInDaysFiltered(function(Carbon $date) {
+             return !($date->isWeekend());},
+             $d2);
+             return $werkdagen;
+
     }
 
     /**

@@ -4,12 +4,37 @@
   var form  = document.getElementById('periodeform');
   var start = $("#start");
   var stop = $("#stop");
+  var aantal_uren_van_titularis = $("#aantal_uren_van_titularis");
 
   //var start = document.getElementById('start');
   //var stop =  document.getElementById('stop');
   var error = document.getElementById('dateRangeError');
+  var urenMessage = document.getElementById('berekenUren');
 
 $(document).ready(function(){
+
+  function calculateUren(){
+    return $.ajax({
+      url: "{{ url('/periodes/calculateUren') }}",
+      method: 'post',
+      data: {
+         _token : '{{ csrf_token() }}',
+         start: start.val(),
+         stop: stop.val(),
+         leerkracht_id: {{$periode->leerkracht->id}},
+         aantal_uren_van_titularis: aantal_uren_van_titularis.val(),
+         school_id : {{$periode->school_id}},
+         status_id : getStatus(),
+         periode_id : {{$periode->id or -1}}
+      },
+      success: function(result){
+         console.log(result);
+      },
+      failure: function(result){
+        console.log(result);
+      }
+    });
+  }
 
 
   function checkForConflict(periode_id){
@@ -33,7 +58,9 @@ $(document).ready(function(){
     });
   }
 
-  function disableSubmit(){
+  function setError(text){
+    error.innerHTML = text;
+    error.className = "error text-danger";
     $('#mysubmit').attr("disabled", "disabled");
   }
 
@@ -47,7 +74,20 @@ $(document).ready(function(){
     $('#mysubmit').removeAttr("disabled");
   }
 
+  function setUren(aantal){
+    urenMessage.className = "error text-info";
+    urenMessage.innerHTML ="Aantal uren voor deze vervanging: "+aantal;
+  }
 
+  function clearUren(){
+    urenMessage.className = "error";
+    urenMessage.innerHTML ="";
+  }
+
+  function getStatus(){
+    var a = parseInt($("input[name='status_id']:checked").val());
+    return a;
+  }
 
   function addValueCheck(element){
     element.on('change',function(){
@@ -58,11 +98,7 @@ $(document).ready(function(){
 
         stop.addClass("is-invalid");
         start.addClass("is-invalid");
-        // If the field is not valid, we display a custom
-        // error message.
-        error.innerHTML = "Stopdatum mag niet voor startdatum vallen";
-        error.className = "error text-danger";
-        disableSubmit();
+        setError("Stopdatum mag niet voor startdatum vallen");
         return;
       }
       else {
@@ -73,14 +109,25 @@ $(document).ready(function(){
       checkForConflict({{$periode->id}}).done(function(data){
         if (data.result!=null){
           element.addClass("is-invalid");
-          error.innerHTML = data.result;
-          error.className = "error text-danger";
-          disableSubmit();
+          setError(data.result);
+          return;
         }
         else {
           element.removeClass("is-invalid")
           clearError();
+          if (getStatus() != {{\App\Status::opengesteld()}}){
+            calculateUren().done(function(data){
+              if (data.result!=null) {
+                 clearUren();
+                 setError(data.result);
+                 enableSubmit();
+              }
+              else
+                //clearError();
+                setUren(data.uren);
 
+            });
+          }
         }
       });
     });
