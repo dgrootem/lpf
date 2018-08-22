@@ -14,6 +14,8 @@ use Log;
 
 class PeriodeController extends Controller
 {
+    public const UREN_PER_DAG=4.8;
+
     /**
      * Display a listing of the resource.
      *
@@ -36,7 +38,7 @@ class PeriodeController extends Controller
 
         $leerkracht = Leerkracht::find(request('leerkracht'));
         $datum = request("datum");
-        if (is_null($datum)) $datum = Carbon::today();
+        if (is_null($datum)) $datum = Carbon::today()->setTime(0,0,0);
         $periode = new Periode;
         $periode->school_id = 1;
         $periode->leerkracht_id = $leerkracht->id;
@@ -50,7 +52,9 @@ class PeriodeController extends Controller
         $ambts = Ambt::pluck('naam','id');
 
         $statuses = Status::where('choosable',1)->get();
-        return view('periode.create',compact('periode','statuses','ambts'));
+
+        $scholen = CalculationController::totalsForCurrentUser();
+        return view('periode.create',compact('periode','statuses','ambts','scholen'));
     }
 
     /**
@@ -94,7 +98,8 @@ class PeriodeController extends Controller
         $ambts = Ambt::pluck('naam','id');
         //Log::debug('edit route');
         //Log::debug(compact('periode'));
-        return view('periode.edit',compact(['periode','statuses','ambts']));
+        $scholen = CalculationController::totalsForCurrentUser();
+        return view('periode.edit',compact(['periode','statuses','ambts','scholen']));
     }
 
     /**
@@ -286,12 +291,12 @@ class PeriodeController extends Controller
       $status = $this->fromRequest('status_id');
       $periode_id = $this->fromRequest('periode_id');
 
-      return $this->berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id);
-    }
-
-    function berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id)
-    {
-      Log::debug('status=' . $status);
+    //   return $this->berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id);
+    // }
+    //
+    // function berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id)
+    // {
+      // Log::debug('status=' . $status);
       if ($status == Status::opengesteld()){
 
         $result = "";
@@ -301,7 +306,7 @@ class PeriodeController extends Controller
 
 
         $dagen = $this->calculateNbDays($datestart,$datestop);
-        Log::debug('dagen='.$dagen);
+        // Log::debug('dagen='.$dagen);
         $leerkracht = Leerkracht::find($leerkracht_id);
         $school = School::find($school_id);
 
@@ -317,10 +322,10 @@ class PeriodeController extends Controller
                       $leerkracht->lestijden_per_week .
                       ") dan gewenste opdracht (" . $opdrachtBreuk.")" ;
                       */
-        Log::debug('aantal_uren_van_titularis='.$opdrachtBreuk);
-        Log::debug('lestijden_per_week LPF='.$leerkracht->lestijden_per_week);
-        Log::debug('minimum='.(min($opdrachtBreuk,$leerkracht->lestijden_per_week)));
-        $uren = $dagen * min($opdrachtBreuk,$leerkracht->lestijden_per_week);
+        // Log::debug('aantal_uren_van_titularis='.$opdrachtBreuk);
+        // Log::debug('lestijden_per_week LPF='.$leerkracht->lestijden_per_week);
+        // Log::debug('minimum='.(min($opdrachtBreuk,$leerkracht->lestijden_per_week)));
+        $uren = $dagen * min($opdrachtBreuk,$leerkracht->lestijden_per_week) / $school->school_type->noemer * PeriodeController::UREN_PER_DAG;
       }
       return compact('result','uren');
     }
@@ -330,7 +335,7 @@ class PeriodeController extends Controller
       $werkdagen = $d1->diffInDaysFiltered(function(Carbon $date) {
              return !($date->isWeekend());},
              $d2);
-             return $werkdagen;
+             return $werkdagen+1;
 
     }
 

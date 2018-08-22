@@ -19,4 +19,10 @@ class School extends Model
     public function users(){
       return $this->belongsToMany(User::class);
     }
+
+    public function periodes(){
+      return $this->hasMany(Periode::class);
+    }
+
+    
 }

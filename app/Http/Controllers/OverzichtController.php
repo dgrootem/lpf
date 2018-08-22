@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Auth;
+
 use App\School;
 use App\Leerkracht;
 use App\Status;
@@ -76,8 +79,16 @@ class OverzichtController extends Controller
     }
     //return compact(['range','periodesInRange','leerkrachten']);
 
-    return view('overzicht',compact(['range','periodesInRange','leerkrachten']));
+
+    $scholen = CalculationController::totalsForCurrentUser();
+
+    //return compact(['range','periodesInRange','leerkrachten','scholen']);
+
+    return view('overzicht',compact(['range','periodesInRange','leerkrachten','scholen']));
   }
+
+
+
 
   /**
    * Create a new controller instance.

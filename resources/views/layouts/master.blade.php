@@ -28,7 +28,7 @@
     <title>{{ config('app.name', 'LPF') }}</title>
   </head>
   <body>
-    @include('layouts.header')
+    @include('layouts.header2')
     <main>
       <div class="container-fluid">
         @yield('content')
@@ -36,6 +36,7 @@
       </div>
     </main>
     @include('layouts.footer')
+    @include('chart');
     @yield('page-specific-scripts')
   </body>
 </html>
