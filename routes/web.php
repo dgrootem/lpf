@@ -16,6 +16,7 @@ Route::get('/', 'OverzichtController@defaultRange');
 
 
 Route::resource('periodes','PeriodeController');
+Route::resource('user','UserController');
 
 /*
 Route::get('/periodes/create/{leerkracht}', 'PeriodeController@create');

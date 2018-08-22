@@ -1,3 +1,4 @@
+@isset($scholen)
 <script>
 
     Chart.defaults.global.defaultFontColor = 'white';
@@ -7,14 +8,18 @@
       data: {
         labels:
         [
+
+
           @foreach ($scholen as $key => $school)
             ["{{$school['naam']}}"],
           @endforeach
+
         ],
         datasets: [
           {
             label: "RV",
             data: [
+
               @foreach ($scholen as $key => $school)
                 {{$school['RV']}},
               @endforeach
@@ -23,6 +28,7 @@
           {
             label: "ongebruikt",
             data: [
+
               @foreach ($scholen as $key => $school)
                 {{$school['unused']}},
               @endforeach
@@ -31,6 +37,7 @@
           {
             label: "ZT",
             data: [
+
               @foreach ($scholen as $key => $school)
                 {{$school['ZT']}},
               @endforeach
@@ -52,9 +59,5 @@
          }
       }
     });
-
-
-
-
-
 </script>
+@endisset

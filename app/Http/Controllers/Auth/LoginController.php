@@ -67,9 +67,12 @@ class LoginController extends Controller
 
         $authUser = $this->findOrCreateUser($user, 'google');
 
-        Auth::login($authUser, true);
+        Auth::login($authUser['user'], true);
 
-        return redirect($this->redirectTo);
+        if ($authUser['new'] == true)
+          return redirect('/user/'.$authUser['user']->id.'/edit');
+        else
+          return redirect($this->redirectTo);
 
     }
 
@@ -84,14 +87,19 @@ class LoginController extends Controller
     {
         $authUser = User::where('provider_id', $user->id)->first();
         if ($authUser) {
-            return $authUser;
+            return array('user'=>$authUser,'new' => false);
         }
-        return User::create([
-            'name'     => $user->name,
-            'email'    => $user->email,
-            'provider' => $provider,
-            'provider_id' => $user->id
-        ]);
+        return array(
+            'user'=>
+              User::create([
+              'name'     => $user->name,
+              'email'    => $user->email,
+              'provider' => $provider,
+              'provider_id' => $user->id
+              ])
+            ,
+            'new' => true);
+
     }
 
 
