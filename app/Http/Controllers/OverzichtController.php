@@ -13,6 +13,8 @@ use App\Periode;
 
 use Carbon\Carbon;
 
+use Log;
+
 
 
 class OverzichtController extends Controller
@@ -26,7 +28,11 @@ class OverzichtController extends Controller
     if ($a->gt($b)) {return $a;} else {return $b;}
   }
 
-  public function defaultRange(){
+  public function range($startDate){
+
+    $startOfRange = Carbon::parse($startDate);
+    Log::debug($startOfRange);
+
     setlocale(LC_TIME,'nl-BE');
     $format = '%d-%m-%Y';
 
@@ -40,30 +46,33 @@ class OverzichtController extends Controller
 
     $leerkrachten = Leerkracht::where('actief',1)->get();
 
-    $nbdays=21;
+    $nbdays=env('NBDAYS_IN_OVERZICHT');
 
-    $today = Carbon::today();
-    $endRange = Carbon::today()->addDays($nbdays-1);
+    $stopOfRange = clone $startOfRange;
+    $stopOfRange->addDays($nbdays-1);
+
+
+    $startPunt = clone $startOfRange;
     $range = array();
     for ($i=0; $i < $nbdays; $i++) {
       $tempArray = array();
       foreach ($leerkrachten as $key => $value) {
         $tempArray[$value->id] = $emptyPeriode;
       }
-      $range[Carbon::today()->addDays($i)->formatLocalized($format)] = $tempArray;
+      //increment the $startdate by 1 in each iteration (addDays is a mutator)
+      $range[$startPunt->formatLocalized($format)] = $tempArray;
+      $startPunt->addDays(1);
     }
 
-    $periodesInRange = Periode::periodesInRange(Carbon::today()->format('Y-m-d'),
-                                                $endRange->format('Y-m-d'),
+    $periodesInRange = Periode::periodesInRange($startOfRange->format('Y-m-d'),
+                                                $stopOfRange->format('Y-m-d'),
                                                 0)->get();
 
     foreach ($periodesInRange as $key => $periode) {
       $ps=$periode->start;
       $pe=$periode->stop;
-      $today=Carbon::today();
-      $start = $this->max(Carbon::parse($periode->start),Carbon::today());
-
-      $stop = $this->min(Carbon::parse($periode->stop),$endRange);
+      $start = $this->max(Carbon::parse($periode->start),$startOfRange);
+      $stop = $this->min(Carbon::parse($periode->stop),$stopOfRange);
 
       //return compact('start','stop','ps','pe','today','endRange');
 
@@ -84,7 +93,12 @@ class OverzichtController extends Controller
 
     //return compact(['range','periodesInRange','leerkrachten','scholen']);
 
-    return view('overzicht',compact(['range','periodesInRange','leerkrachten','scholen']));
+    return view('overzicht',compact(['range','periodesInRange','leerkrachten','scholen','startOfRange']));
+  }
+
+  public function defaultRange(){
+    $today = Carbon::today();
+    return $this->range($today);
   }
 
 

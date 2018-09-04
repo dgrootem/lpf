@@ -4,7 +4,14 @@
 <div class="container-fluid">
   <table class="table">
     <tr>
-      <th></th>
+      <th>
+        <a href="/overzichten/{{$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))}}">
+          <span class="fa fa-angle-up"></span>
+        </a>
+        <a href="/overzichten/{{$startOfRange->copy()->addDays(env('NBDAYS_IN_OVERZICHT'))}}">
+          <span class="fa fa-angle-down"></span>
+        </a>
+      </th>
       @foreach ($leerkrachten as $key => $leerkracht)
       <th><a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
       @endforeach
