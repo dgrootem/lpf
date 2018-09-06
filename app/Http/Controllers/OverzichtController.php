@@ -28,9 +28,13 @@ class OverzichtController extends Controller
     if ($a->gt($b)) {return $a;} else {return $b;}
   }
 
-  public function range($startDate){
+  public function range($startDate = null){
 
-    $startOfRange = Carbon::parse($startDate);
+    if (isset($startDate))
+      $startOfRange = Carbon::parse($startDate);
+    else {
+      $startOfRange = Carbon::today();
+    }
     Log::debug($startOfRange);
 
     setlocale(LC_TIME,'nl-BE');

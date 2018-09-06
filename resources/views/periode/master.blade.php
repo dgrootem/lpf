@@ -4,18 +4,25 @@
 <div class="container">
   <div class="row">
     <div class="col">
+      <div class="container">
+        @yield('delete_button')
+        <div class="row">
 
+
+        <div class="col badge badge-primary">
+          <h2 class="text-center">
+          Plan een periode voor <span class="badge badge-light">{{$periode->leerkracht->naam}}</span> in <span class="badge badge-light">{{$periode->school->naam}}</span>
+          </h2>
+        </div>
+
+
+
+      </div>
       @yield('form_open')
       <input type="hidden" name="school_id" value="{{$periode->school_id or old('school_id')}}">
       <input type="hidden" name="leerkracht_id" value="{{$periode->leerkracht_id or old('leerkracht_id')}}">
       <input type="hidden" name="heleDag" value="1">
       <input type="hidden" name="periode_id" value="{{$periode->id}}">
-
-      <h2 class="text-center">
-        <span class="badge badge-primary">
-          Plan een periode voor <span class="badge badge-light">{{$periode->leerkracht->naam}}</span> in <span class="badge badge-light">{{$periode->school->naam}}</span>
-        </span>
-      </h2>
 
       <br>
       <div class="form-row">
@@ -36,7 +43,7 @@
 
       {{ Form::close() }}
 
-      @yield('delete_button')
+
     </div>
   </div>
 </div>

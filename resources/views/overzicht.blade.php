@@ -5,11 +5,11 @@
   <table class="table">
     <tr>
       <th>
-        <a href="/overzichten/{{$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))}}">
-          <span class="fa fa-angle-up"></span>
+        <a href="/overzichten/{{$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d')}}">
+          <span class="fa fa-2x fa-angle-up"></span>
         </a>
-        <a href="/overzichten/{{$startOfRange->copy()->addDays(env('NBDAYS_IN_OVERZICHT'))}}">
-          <span class="fa fa-angle-down"></span>
+        <a href="/overzichten/{{$startOfRange->copy()->addDays(env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d')}}">
+          <span class="fa fa-2x fa-angle-down"></span>
         </a>
       </th>
       @foreach ($leerkrachten as $key => $leerkracht)

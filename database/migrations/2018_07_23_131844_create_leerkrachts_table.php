@@ -17,7 +17,7 @@ class CreateLeerkrachtsTable extends Migration
             $table->increments('id');
             $table->string('naam');
             $table->unsignedInteger('ambt_id');
-            $table->string('lestijden_per_week');
+            
             //$table->unsignedInteger('vaste_school_id');
             $table->smallInteger('actief'); // ja / nee
             $table->timestamps();

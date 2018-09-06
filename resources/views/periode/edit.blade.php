@@ -9,13 +9,14 @@
 @endsection
 
 @section('delete_button')
-  {{ Form::model($periode, array('class' => 'col needs-validation',
-                                'route' => array('periodes.destroy', $periode->id),
-                                'method' => 'DELETE','id' => 'deleteform')) }}
-  <div class="form-row">
-    <div class="col text-center">
+
+<div class="row">
+    <div class="col text-right">
+      {{ Form::model($periode, array('class' => 'needs-validation',
+                                    'route' => array('periodes.destroy', $periode->id),
+                                    'method' => 'DELETE','id' => 'deleteform')) }}
       <button type="submit" class="btn btn-danger text-center delete" id="deleteButton">VERWIJDER</button>
     </div>
-  </div>
+</div>
   {{ Form::close() }}
 @endsection
