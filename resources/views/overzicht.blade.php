@@ -56,7 +56,7 @@ $(document).ready(function () {
     window.location.href = "{{url('/periodes')}}/create?leerkracht="
                           +$(this).data("leerkracht")
                           +"&datum="+$(this).data("datum");
-    //alert( "Handler for .click() on periode {{$periode->id}} called." );
+
   });
 });
 </script>

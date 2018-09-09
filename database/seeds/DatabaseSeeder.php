@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(StatusSeeder::class);
         //$this->call(UserSeeder::class);
         //create links between teachers and schools
-        $this->call(LeerkrachtSchoolSeeder::class);
+        //$this->call(LeerkrachtSchoolSeeder::class);
         //do the same for the users
       //$this->call(SchoolUserSeeder::class);
 

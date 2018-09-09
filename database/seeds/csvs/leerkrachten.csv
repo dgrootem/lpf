@@ -1,8 +1,8 @@
-naam,ambt_id,actief
-Lara Goris,1,1
-Jill Devroey,2,1
-Febe Trimpeneers,1,1
-Ulrike Vlemincx,1,1
+naam,ambt_id,lestijden_per_week,actief
+Lara Goris,1,12,1
+Jill Devroey,2,16,1
+Febe Trimpeneers,1,24,1
+Ulrike Vlemincx,1,12,1
 Alex Terieur,1,1
 Alain Terieur,1,1
 Magda Nuwelle,2,1
