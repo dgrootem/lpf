@@ -61,6 +61,7 @@ class LeerkrachtController extends Controller
     public function edit(Leerkracht $leerkracht)
     {
       $beschikbarescholen = School::all();
+
       return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen']));
     }
 
@@ -75,8 +76,10 @@ class LeerkrachtController extends Controller
     {
         //
         $leerkracht = Leerkracht::find($id);
+        //$previous = request('myprevious');
         $data = request()->all();
-        $leerkracht->update($data);        
+        $leerkracht->update($data);
+        return redirect(url('/overzichten'));
     }
 
     /**

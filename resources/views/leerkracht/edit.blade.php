@@ -4,6 +4,7 @@
 <form class="form" action="/leerkracht/{{$leerkracht->id}}" method="post">
   <input name="_method" type="hidden" value="PUT">
 
+
   @csrf
   <div class="container">
     <div class="row">

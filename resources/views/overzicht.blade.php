@@ -13,7 +13,10 @@
         </a>
       </th>
       @foreach ($leerkrachten as $key => $leerkracht)
-      <th><a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a></th>
+      <th>
+        <a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a>
+        <a href="{{url('/leerkracht/'.$leerkracht->id.'/edit')}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+      </th>
       @endforeach
     </tr>
 
