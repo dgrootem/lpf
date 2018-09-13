@@ -68,7 +68,7 @@ class PeriodeController extends Controller
         $periode = new Periode;
         $this->fillPeriode($request,$periode);
 
-        $this->checkAndFix($periode);
+        //$this->checkAndFix($periode);
         $periode->save();
 
         return redirect('/overzichten');
@@ -114,7 +114,7 @@ class PeriodeController extends Controller
         //return compact('id');
         $periode = Periode::find($id);
         $this->fillPeriode($request,$periode);
-        $this->checkAndFix($periode);
+        //$this->checkAndFix($periode);
         $periode->save();
         return redirect('/overzichten');
     }
@@ -162,7 +162,7 @@ class PeriodeController extends Controller
     private function checkDatumInPeriodeConflict($date,$startstop,$leerkracht_id,$periode_id)
     {
       $periode = $this->periodeDieDatumBevat($date,$leerkracht_id,$periode_id);
-      if (!((is_null($periode)) || ($periode->status_id == Status::opengesteld())))
+      if (!((is_null($periode))))// || ($periode->status_id == Status::opengesteld())))
         return $startstop . "in bestaande periode";
       else
         return null;
@@ -192,7 +192,7 @@ class PeriodeController extends Controller
     }
 
 
-
+/*
     function checkAndFix($periodeToCheckFor){
       $oudePeriode = Periode::find($periodeToCheckFor->id);
 
@@ -272,6 +272,7 @@ class PeriodeController extends Controller
                     ->where('stop','>=',$date)->first();
       return $periode;
     }
+    */
 
     //TODO: herschalen wanneer LPF-leerkracht in ander systeem werkt dan aantal_uren_van_titularis:
     //  bijvoorbeeld: titularis werkt in BaO in /24, LPF in /22, dan is 19/24 te herschalen naar 17,5/22 ??
@@ -297,13 +298,13 @@ class PeriodeController extends Controller
     // function berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id)
     // {
       // Log::debug('status=' . $status);
-      if ($status == Status::opengesteld()){
+      /*if ($status == Status::opengesteld()){
 
         $result = "";
         $uren = 0;
       }
       else{
-
+*/
 
         $dagen = $this->calculateNbDays($datestart,$datestop);
         // Log::debug('dagen='.$dagen);
@@ -326,7 +327,7 @@ class PeriodeController extends Controller
         // Log::debug('lestijden_per_week LPF='.$leerkracht->lestijden_per_week);
         // Log::debug('minimum='.(min($opdrachtBreuk,$leerkracht->lestijden_per_week)));
         $uren = $dagen * min($opdrachtBreuk,$leerkracht->lestijden_per_week) / $school->school_type->noemer * PeriodeController::UREN_PER_DAG;
-      }
+      //}
       return compact('result','uren');
     }
 

@@ -2,7 +2,8 @@
 
 @section('content')
 <div class="container-fluid">
-  <table class="table">
+  <table class="table table-bordered">
+    <thead>
     <tr>
       <th>
         <a href="/overzichten/{{$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d')}}">
@@ -19,27 +20,50 @@
       </th>
       @endforeach
     </tr>
+  </thead>
 
-
-    @foreach ($range as $datum => $lijn)
-      <tr @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
-        <th>{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
-        @foreach ($lijn as $leerkrachtid => $periode)
+    @foreach ($dateRange as $datum => $lijn)
+    <tbody>
+      <tr height="50%" @if (\Carbon\Carbon::parse($datum)->isWeekend())  class="collapsedrow" @endif>
+        <th rowspan="2" scope="rowgroup">{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
+        @foreach ($lijn['VM'] as $leerkrachtid => $periode)
           <td
             class="{{$periode->status->visualisatie}}
-            @if (strcmp($periode->status->visualisatie,'')<>0)
+            @if (strcmp($periode->status->omschrijving,'RV')==0)
               clickablecell-{{$periode->id}}
             @else
               clickablecell-new
             @endif
+            clickablecell
             "
             data-leerkracht="{{$leerkrachtid}}"
             data-datum="{{$datum}}"
             title="{{$periode->opmerking}}">
-              {{ $periode->status->omschrijving}}
+            @if (!is_null($periode->school))
+              {{$periode->school->naam}}
+            @endif
           </td>
         @endforeach
       </tr>
+      <tr height="50%" @if (\Carbon\Carbon::parse($datum)->isWeekend()) class="collapsedrow" @endif>
+        @foreach ($lijn['NM'] as $leerkrachtid => $periode)
+          <td
+            class="{{$periode->status->visualisatie}}
+            @if (strcmp($periode->status->omschrijving,'RV')==0)
+              clickablecell-{{$periode->id}}
+            @else
+              clickablecell-new
+            @endif
+            clickablecell
+            "
+            data-leerkracht="{{$leerkrachtid}}"
+            data-datum="{{$datum}}"
+            title="{{$periode->opmerking}}">
+
+          </td>
+        @endforeach
+      </tr>
+    </tbody>
     @endforeach
   </table>
 </div>

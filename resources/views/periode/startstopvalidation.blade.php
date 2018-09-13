@@ -115,7 +115,7 @@ $(document).ready(function(){
         else {
           element.removeClass("is-invalid")
           clearError();
-          if (getStatus() != {{\App\Status::opengesteld()}}){
+
             calculateUren().done(function(data){
               if (data.result!=null) {
                  clearUren();
@@ -123,11 +123,10 @@ $(document).ready(function(){
                  enableSubmit();
               }
               else
-                //clearError();
                 setUren(data.uren);
 
             });
-          }
+
         }
       });
     });

@@ -28,6 +28,40 @@ class OverzichtController extends Controller
     if ($a->gt($b)) {return $a;} else {return $b;}
   }
 
+
+
+  private function datumStatus($datum,$leerkracht){
+    $dag = $datum->dayOfWeek;
+    switch($dag){
+      case 0 : return array(
+        'VM' => null,
+        'NM' => null,
+      );break;
+      case 1 : return array(
+        'VM' => $leerkracht->ma_vm,
+        'NM' => $leerkracht->ma_nm,
+      );break;
+      case 2 : return array(
+        'VM' => $leerkracht->di_vm,
+        'NM' => $leerkracht->di_nm,
+      );break;
+      case 3 : return array(
+        'VM' => $leerkracht->wo_vm,
+        'NM' => null,
+      );break;
+      case 4 : return array(
+        'VM' => $leerkracht->do_vm,
+        'NM' => $leerkracht->do_nm,
+      );break;
+      case 5 : return array(
+        'VM' => $leerkracht->vr_vm,
+        'NM' => $leerkracht->vr_nm,
+      );break;
+
+    }
+
+  }
+
   public function range($startDate = null){
 
     if (isset($startDate))
@@ -40,13 +74,17 @@ class OverzichtController extends Controller
     setlocale(LC_TIME,'nl-BE');
     $format = '%d-%m-%Y';
 
-    $emptyPeriode = new Periode;
+    $availablePeriode = new Periode;
+    $availablePeriode->status =  Status::where('omschrijving','zt')->first();
+    $availablePeriode->id = -1;
 
-    $emptyStatus = new Status;
-    $emptyStatus->omschrijving = '';
-    $emptyStatus->visualisatie='';
-    $emptyPeriode->status = $emptyStatus;
-    $emptyPeriode->id = -1;
+    $unavailablePeriode = new Periode;
+    $unavailableStatus = new Status;
+    $unavailableStatus->omschrijving = '';
+    $unavailableStatus->visualisatie = 'disabled';
+    $unavailablePeriode->status = $unavailableStatus;
+    $unavailablePeriode->id = -1;
+
 
     $leerkrachten = Leerkracht::where('actief',1)->get();
 
@@ -56,16 +94,29 @@ class OverzichtController extends Controller
     $stopOfRange->addDays($nbdays-1);
 
 
-    $startPunt = clone $startOfRange;
-    $range = array();
+    $datumIterator = clone $startOfRange;
+    $dateRange = array();
     for ($i=0; $i < $nbdays; $i++) {
-      $tempArray = array();
+      $tempArray = array('VM' => array(),'NM' => array());
       foreach ($leerkrachten as $key => $value) {
-        $tempArray[$value->id] = $emptyPeriode;
+        $bla = $this->datumStatus($datumIterator,$value);
+
+        //als aangesteld in bepaalde school, dan beschikbaar in dat dagdeel
+        if (is_null($bla['VM']))
+          $tempArray['VM'][$value->id] = $unavailablePeriode;
+        else
+          $tempArray['VM'][$value->id] = $availablePeriode;
+
+        if (is_null($bla['NM']))
+          $tempArray['NM'][$value->id] = $unavailablePeriode;
+        else
+          $tempArray['NM'][$value->id] = $availablePeriode;
       }
+      Log::debug("TEMPARRAY=");
+      Log::debug($tempArray['VM'][6]);
       //increment the $startdate by 1 in each iteration (addDays is a mutator)
-      $range[$startPunt->formatLocalized($format)] = $tempArray;
-      $startPunt->addDays(1);
+      $dateRange[$datumIterator->formatLocalized($format)] = $tempArray;
+      $datumIterator->addDays(1);
     }
 
     $periodesInRange = Periode::periodesInRange($startOfRange->format('Y-m-d'),
@@ -85,19 +136,19 @@ class OverzichtController extends Controller
         $copy= clone $start;
         $copy->addDays($i);
         if (!$copy->isWeekend())
-        $range[$copy->formatLocalized($format)][$periode->leerkracht->id] = $periode;
+        $dateRange[$copy->formatLocalized($format)][$periode->leerkracht->id] = $periode;
       }
 
 
     }
-    //return compact(['range','periodesInRange','leerkrachten']);
+    //return compact(['dateRange','periodesInRange','leerkrachten']);
 
 
     $scholen = CalculationController::totalsForCurrentUser();
 
-    //return compact(['range','periodesInRange','leerkrachten','scholen']);
+    //return compact(['dateRange','periodesInRange','leerkrachten','scholen']);
 
-    return view('overzicht',compact(['range','periodesInRange','leerkrachten','scholen','startOfRange']));
+    return view('overzicht',compact(['dateRange','periodesInRange','leerkrachten','scholen','startOfRange']));
   }
 
   public function defaultRange(){

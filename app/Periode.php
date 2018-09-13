@@ -57,15 +57,16 @@ class Periode extends Model
      return Periode::periodesInRange($begin,$einde,$deleted)->where('id','<>',$zelf)->where('leerkracht_id',$leerkracht_id);
    }
 
+/*
    function scopeOpenPeriodesInRangeForLeerkracht($query,$start,$stop,$leerkracht_id,$mezelf){
      return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,0)->where('status_id',Status::opengesteld());
    }
-
+*/
    function scopeDeletedPeriodesInRangeForLeerkracht($query,$start,$stop,$leerkracht_id,$mezelf){
      return Periode::periodesInRangeForLeekracht($start,$stop,$leerkracht_id,$mezelf,1);
 
    }
 
-   
+
 
 }

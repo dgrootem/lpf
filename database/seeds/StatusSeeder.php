@@ -16,9 +16,9 @@ class StatusSeeder extends Seeder
         //
         DB::table('statuses')->insert([
             'omschrijving' => 'ZT',
-            'visualisatie' => 'bg-warning',
-            'available' => 0,
-            'choosable' => 1,
+            'visualisatie' => 'bg-light availableCell',
+            'available' => 1,
+            'choosable' => 0,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -30,18 +30,26 @@ class StatusSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
-        DB::table('statuses')->insert([
+        /*DB::table('statuses')->insert([
             'omschrijving' => 'opengesteld',
             'visualisatie' => 'bg-primary',
             'available' => 1,
             'choosable' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
-        ]);
+        ]);*/
         DB::table('statuses')->insert([
             'omschrijving' => 'geannuleerd',
             'visualisatie' => 'bg-secondary',
             'available' => 1,
+            'choosable' => 0,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+        DB::table('statuses')->insert([
+            'omschrijving' => 'niet beschikbaar',
+            'visualisatie' => 'bg-secondary',
+            'available' => 0,
             'choosable' => 0,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
