@@ -43,6 +43,7 @@ class PeriodeController extends Controller
         $periode->school_id = 1;
         $periode->leerkracht_id = $leerkracht->id;
         $periode->start = $datum;
+
         $periode->stop = $datum;
         $periode->ambt = $leerkracht->ambt;
 
@@ -128,7 +129,9 @@ class PeriodeController extends Controller
     private function fillPeriode(Request $request,Periode $periode){
 
       $periode->start = Carbon::parse($this->fromRequest('start'));
+      $periode->startDagDeel = $this->fromRequest('startDagDeel');
       $periode->stop = Carbon::parse($this->fromRequest('stop'));
+      $periode->stopDagDeel = $this->fromRequest('stopDagDeel');
       $periode->school_id = $this->fromRequest('school_id');
       $periode->leerkracht_id = $this->fromRequest('leerkracht_id');
       $periode->aantal_uren_van_titularis = $this->fromRequest('aantal_uren_van_titularis');

@@ -14,6 +14,22 @@
                 array('min' => '2018-07-01','max'=>'2019-06-30',
                     'class' => 'form-control')) }}
             </div>
+            <div class="col">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-light @if (strcmp($periode->startDagDeel,"VM")==0 ) active @endif">
+                  <input type="radio" required name="startDagDeel" id="startDagDeel-VM" value="VM" autocomplete="off"
+                    @if (strcmp($periode->startDagDeel,"VM")==0 )
+                      checked
+                    @endif
+                    >
+                  <span class="glyphicon glyphicon-ok fa fa-check"></span>VM
+                </label>
+                <label class="btn btn-light @if (strcmp($periode->startDagDeel,"NM")==0 ) active @endif">
+                  <input type="radio" required name="startDagDeel" id="startDagDeel-NM" value="NM" autocomplete="off" @if (strcmp($periode->startDagDeel,"NM")==0 ) checked @endif>
+                  <span class="glyphicon glyphicon-ok fa fa-check"></span>NM
+                </label>
+              </div>
+            </div>
           </div>
         </p>
   <!-- </div> -->
@@ -28,6 +44,18 @@
           {{Form::date('stop',$periode->stop,
             array('min' => '2018-07-01','max'=>'2019-06-30',
                   'class' => 'form-control')) }}
+            </div>
+            <div class="col">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-light @if (strcmp($periode->stopDagDeel,"VM")==0 ) active @endif">
+                  <input type="radio" required name="stopDagDeel" id="stopDagDeel-VM" value="VM" autocomplete="off" @if (strcmp($periode->stopDagDeel,"VM")==0 ) checked @endif>
+                  <span class="glyphicon glyphicon-ok fa fa-check"></span>VM
+                </label>
+                <label class="btn btn-light @if (strcmp($periode->stopDagDeel,"NM")==0 ) active @endif">
+                  <input type="radio" required name="stopDagDeel" id="stopDagDeel-NM" value="NM" autocomplete="off" @if (strcmp($periode->stopDagDeel,"NM")==0 ) checked @endif>
+                  <span class="glyphicon glyphicon-ok fa fa-check"></span>NM
+                </label>
+              </div>
             </div>
           </div>
         </p>

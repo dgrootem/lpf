@@ -49,8 +49,8 @@ class Periode extends Model
    }
 
 
-   public function scopePeriodesInRange($query,$begin,$einde,$deleted){
-     return $query->where('deleted',$deleted)->where('stop','>=',$begin)->where('start','<=',$einde);
+   public function scopePeriodesInRange($query,$begin,$einde){
+     return $query->where('stop','>=',$begin)->where('start','<=',$einde);
    }
 
    public function scopePeriodesInRangeForLeekracht($query,$begin,$einde,$leerkracht_id,$zelf,$deleted){

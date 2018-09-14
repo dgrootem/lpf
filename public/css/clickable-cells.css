@@ -1,10 +1,8 @@
 td.clickablecell  {
   vertical-align: middle;
   text-align: center;
-
   font-size: 10px;
   padding: 0px;
-
 }
 
 
@@ -28,4 +26,15 @@ a.fullcell {
 
 .availableCell {
   background-color:  #ffffcc !important;
+}
+
+.bookedCell {
+  background-color:  #28A745 !important;
+}
+
+.btn span.glyphicon {
+	opacity: 0;
+}
+.btn.active span.glyphicon {
+	opacity: 1;
 }

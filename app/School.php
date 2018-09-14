@@ -33,4 +33,14 @@ class School extends Model
     }
 
 
+    public static function EmptySchool(){
+      static $emptySchool;
+      if (is_null($emptySchool)){
+        $emptySchool = new School;
+        $emptySchool->id = 1;
+      }
+      return $emptySchool;
+    }
+
+
 }
