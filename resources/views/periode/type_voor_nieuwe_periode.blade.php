@@ -20,18 +20,18 @@
                 <div class="p-2 bd-highlight flex-fill">VR</div>
               </div>
               <div class="d-flex flex-row bd-highlight mb-0">
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="MA_VM" @if($periode->MA_VM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DI_VM" @if($periode->DI_VM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="WO_VM" @if($periode->WO_VM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DO_VM" @if($periode->DO_VM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="VR_VM" @if($periode->VR_VM==1) checked @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="MA_VM" @if($periode->MA_VM==1) checked @endif @if(PCont::canBeChosen($periode,'MA_VM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DI_VM" @if($periode->DI_VM==1) checked @endif @if(PCont::canBeChosen($periode,'DI_VM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="WO_VM" @if($periode->WO_VM==1) checked @endif @if(PCont::canBeChosen($periode,'WO_VM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DO_VM" @if($periode->DO_VM==1) checked @endif @if(PCont::canBeChosen($periode,'DO_VM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="VR_VM" @if($periode->VR_VM==1) checked @endif @if(PCont::canBeChosen($periode,'VR_VM')) disabled @endif></div>
               </div>
               <div class="d-flex flex-row bd-highlight mb-0">
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="MA_NM" @if($periode->MA_NM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DI_NM" @if($periode->DI_NM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="WO_NM" disabled></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DO_NM" @if($periode->DO_NM==1) checked @endif></div>
-                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="VR_NM" @if($periode->VR_NM==1) checked @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="MA_NM" @if($periode->MA_NM==1) checked @endif @if(PCont::canBeChosen($periode,'MA_NM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DI_NM" @if($periode->DI_NM==1) checked @endif @if(PCont::canBeChosen($periode,'DI_NM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="WO_NM" disabled class="invisible"></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DO_NM" @if($periode->DO_NM==1) checked @endif @if(PCont::canBeChosen($periode,'DO_NM')) disabled @endif></div>
+                <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="VR_NM" @if($periode->VR_NM==1) checked @endif @if(PCont::canBeChosen($periode,'VR_NM')) disabled @endif></div>
               </div>
             </div>
           </div>

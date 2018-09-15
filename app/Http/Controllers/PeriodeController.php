@@ -9,6 +9,8 @@ use App\Status;
 use App\Periode;
 use App\Ambt;
 
+use Illuminate\Support\Facades\Auth;
+
 use Carbon\Carbon;
 use Log;
 
@@ -47,7 +49,7 @@ class PeriodeController extends Controller
         $periode->stop = $datum;
         $periode->ambt = $leerkracht->ambt;
 
-        $scholenlijst = School::all()->pluck('naam','id');
+        $scholenlijst = School::alle()->pluck('naam','id');
 
         $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
         $ambts = Ambt::pluck('naam','id');
@@ -99,7 +101,7 @@ class PeriodeController extends Controller
         $ambts = Ambt::pluck('naam','id');
         //Log::debug('edit route');
         //Log::debug(compact('periode'));
-        $scholenlijst = School::all()->pluck('naam','id');
+        $scholenlijst = School::alle()->pluck('naam','id');
         $scholen = CalculationController::totalsForCurrentUser();
         return view('periode.edit',compact(['periode','statuses','ambts','scholen','scholenlijst']));
     }
@@ -212,6 +214,11 @@ class PeriodeController extends Controller
         $result = null;
 
       return compact('result');
+    }
+
+    public static function canBeChosen($periode,$dagDeel){
+      $a = $periode->leerkracht->toArray();
+      return (is_null($a[$dagDeel]) || (!in_array($a[$dagDeel],Auth::user()->schools()->pluck('id')->toArray())));
     }
 
 

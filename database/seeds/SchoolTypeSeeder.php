@@ -20,6 +20,10 @@ class SchoolTypeSeeder extends Seeder
             'naam' => 'BuO',
             'noemer' => '22'
         ]);
+        DB::table('school_types')->insert([
+            'naam' => 'Special',
+            'noemer' => '1'
+        ]);
 
     }
 }

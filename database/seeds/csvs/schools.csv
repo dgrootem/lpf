@@ -1,4 +1,5 @@
 naam,adres,postcode,gemeente,lestijden_per_week,school_type_id
+GEEN TOEWIJZING,"" ,0 ,"" , 0 , 3
 VBS Paridaens,Janseniusstraat 2, 3000, Leuven, 28,1
 Vrije Basisschool,Mechelsevest 2, 3000, Leuven, 25,1
 Vrije Kleuterschool,Sint-jacobsplein 13, 3000, Leuven, 11,1

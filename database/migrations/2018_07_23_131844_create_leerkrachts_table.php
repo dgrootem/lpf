@@ -19,15 +19,15 @@ class CreateLeerkrachtsTable extends Migration
             $table->unsignedInteger('ambt_id');
 
             //deze velden bevatten de school_id van de school waar deze leerkracht die moment werkt
-            $table->unsignedInteger('MA_VM')->nullable();
-            $table->unsignedInteger('MA_NM')->nullable();
-            $table->unsignedInteger('DI_VM')->nullable();
-            $table->unsignedInteger('DI_NM')->nullable();
-            $table->unsignedInteger('WO_VM')->nullable();
-            $table->unsignedInteger('DO_VM')->nullable();
-            $table->unsignedInteger('DO_NM')->nullable();
-            $table->unsignedInteger('VR_VM')->nullable();
-            $table->unsignedInteger('VR_NM')->nullable();
+            $table->unsignedInteger('MA_VM')->default(1);
+            $table->unsignedInteger('MA_NM')->default(1);
+            $table->unsignedInteger('DI_VM')->default(1);
+            $table->unsignedInteger('DI_NM')->default(1);
+            $table->unsignedInteger('WO_VM')->default(1);
+            $table->unsignedInteger('DO_VM')->default(1);
+            $table->unsignedInteger('DO_NM')->default(1);
+            $table->unsignedInteger('VR_VM')->default(1);
+            $table->unsignedInteger('VR_NM')->default(1);
 
             $table->string('lestijden_per_week');
 

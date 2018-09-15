@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Leerkracht;
 use App\School;
 
+use Log;
+
 class LeerkrachtController extends Controller
 {
     /**
@@ -61,7 +63,6 @@ class LeerkrachtController extends Controller
     public function edit(Leerkracht $leerkracht)
     {
       $beschikbarescholen = School::all();
-
       return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen']));
     }
 
@@ -78,6 +79,7 @@ class LeerkrachtController extends Controller
         $leerkracht = Leerkracht::find($id);
         //$previous = request('myprevious');
         $data = request()->all();
+        Log::debug($data);
         $leerkracht->update($data);
         return redirect(url('/overzichten'));
     }

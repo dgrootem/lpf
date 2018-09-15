@@ -32,6 +32,9 @@ class School extends Model
       return $this->hasMany(Periode::class);
     }
 
+    public function scopeAlle($query){
+      return $query->where('school_type_id','<',3);
+    }
 
     public static function EmptySchool(){
       static $emptySchool;

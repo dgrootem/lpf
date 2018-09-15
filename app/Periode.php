@@ -52,7 +52,9 @@ class Periode extends Model
 
 
    public function scopePeriodesInRange($query,$begin,$einde){
-     return $query->where('stop','>=',$begin)->where('start','<=',$einde);
+     return $query->where('stop','>=',$begin)->where('start','<=',$einde)->whereHas('school',function($query){
+       $query->where('school_type_id','<',3);
+     });
    }
 
    public function scopePeriodesInRangeForLeekracht($query,$begin,$einde,$leerkracht_id,$zelf,$deleted){

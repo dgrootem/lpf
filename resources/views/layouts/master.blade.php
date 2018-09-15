@@ -24,6 +24,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('css/clickable-cells.css')}}">
+    @yield('stylesheets')
 
     <title>{{ config('app.name', 'LPF') }}</title>
   </head>

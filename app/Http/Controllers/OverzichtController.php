@@ -50,7 +50,7 @@ class OverzichtController extends Controller
   private function fillDagDeel($school,$dagdeel)
   {
     $dagdeel->school = $school;
-    if (is_null($school)) $dagdeel->status = DagDeel::UNAVAILABLE;
+    if ((is_null($school)) || ($school->id==1)) $dagdeel->status = DagDeel::UNAVAILABLE;
     else $dagdeel->status = DagDeel::AVAILABLE;
 
     return $dagdeel;

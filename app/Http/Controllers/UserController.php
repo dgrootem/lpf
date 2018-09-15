@@ -59,7 +59,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $beschikbarescholen = School::all();
+        $beschikbarescholen = School::where('school_type_id','<',3)->get();
         $scholen=array();
         return view('user.edit',compact('beschikbarescholen','user','scholen'));
     }
