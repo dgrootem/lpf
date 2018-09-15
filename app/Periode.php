@@ -10,8 +10,10 @@ use Log;
 class Periode extends Model
 {
     //
-    protected $fillable = ['start',
-     'stop',
+    protected $guarded = ['id'];
+    /*
+    protected $fillable = ['start','startDagDeel'
+     'stop','stopDagDeel'
      'school_id',
      'leerkracht_id',
      'ambt_id',
@@ -20,7 +22,7 @@ class Periode extends Model
      'opmerking',
      'heleDag'
    ];
-
+   */
 
    public function getStartAttribute($date){
      return Carbon::parse($date);//->format('Y-m-d');

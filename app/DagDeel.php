@@ -18,4 +18,6 @@ class DagDeel  extends Model
     public $school;
 
     public $visualisatie = 'bg-light';
+
+    public $naam;
 }

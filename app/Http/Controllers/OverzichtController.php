@@ -12,6 +12,7 @@ use App\Status;
 use App\Periode;
 
 use App\DagDeel;
+use App\Dag;
 
 use Carbon\Carbon;
 
@@ -46,30 +47,49 @@ class OverzichtController extends Controller
     }
   }
 
+  private function fillDagDeel($school,$dagdeel)
+  {
+    $dagdeel->school = $school;
+    if (is_null($school)) $dagdeel->status = DagDeel::UNAVAILABLE;
+    else $dagdeel->status = DagDeel::AVAILABLE;
+
+    return $dagdeel;
+  }
 
   private function datumStatus($datum,$leerkracht){
 
-    $dag = $datum->dayOfWeek;
+    $dagnr = $datum->dayOfWeek;
     //Log::debug("dag van de week=".$dag);
 
-    switch($dag){
-      case 0 : return array(
-        'VM' => null,
-        'NM' => null,
-      );break;
-      case 3 : return array(
-        'VM' => $leerkracht->wo_vm,
-        'NM' => null,
-      );break;
-      case 6 : return array(
-        'VM' => null,
-        'NM' => null,
-      );break;
+    $dag = new Dag;
+
+    $dag->vm = new DagDeel;
+    $dag->vm->naam = $this->shortDayOfWeek($dagnr) . '_vm';
+    $dag->nm = new DagDeel;
+    $dag->nm->naam = $this->shortDayOfWeek($dagnr) . '_nm';
+
+    switch($dagnr){
+      case 0 :
+        $dag->vm->status = DagDeel::UNAVAILABLE;
+        $dag->nm->status = DagDeel::UNAVAILABLE;
+      break;
+      case 3 :
+        $dag->vm = $this->fillDagDeel($leerkracht->wo_vm,$dag->vm);
+        $dag->nm->status = DagDeel::UNAVAILABLE;
+      break;
+      case 6 :
+        $dag->vm->status = DagDeel::UNAVAILABLE;
+        $dag->nm->status = DagDeel::UNAVAILABLE;
+      break;
       default:
         //Log::debug("default case");
-        return array('VM' => School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_vm")]),
-                     'NM' => School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_nm")]));
+        $dag->vm = $this->fillDagDeel(School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dagnr)."_vm")]),$dag->vm);
+        $dag->nm = $this->fillDagDeel(School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dagnr)."_nm")]),$dag->nm);
+        //School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_vm")]),
+        //             'NM' => School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_nm")]));
     }
+
+    return $dag;
 
   }
 
@@ -98,6 +118,7 @@ class OverzichtController extends Controller
         $vm = new DagDeel;
         $nm = new DagDeel;
 
+        /*
         $dateStatus = $this->datumStatus($datumIterator,$leerkracht);
 
         $vm->school = $dateStatus['VM'];
@@ -107,9 +128,12 @@ class OverzichtController extends Controller
         $nm->school = $dateStatus['NM'];
         if (is_null($nm->school)) $nm->status = DagDeel::UNAVAILABLE;
         else $nm->status = DagDeel::AVAILABLE;
+        */
 
-        $tempArray['VM'][$leerkracht->id] = $vm;
-        $tempArray['NM'][$leerkracht->id] = $nm;
+        $dag = $this->datumStatus($datumIterator,$leerkracht);
+
+        $tempArray['VM'][$leerkracht->id] = $dag->vm;
+        $tempArray['NM'][$leerkracht->id] = $dag->nm;
 
         Log::debug($vm->school);
         Log::debug($nm->school);
@@ -144,6 +168,7 @@ class OverzichtController extends Controller
       //return compact('start','stop','ps','pe','today','endRange');
 
       $lkrid = $periode->leerkracht->id;
+      $periodeArray = $periode->toArray();
 
       $days = $start->diffInDays($stop)+1;
       $datumIterator = clone $start;
@@ -153,7 +178,7 @@ class OverzichtController extends Controller
         //Log::debug("Leerkracht=".$periode->leerkracht->id);
         $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
         if (!(($i==0) && (strcmp($psd,'NM')==0)))
-          if ($dagDeel->status==DagDeel::AVAILABLE)
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($periodeArray[strtoupper($dagDeel->naam)]==1))
           {
             //Log::debug('VM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;
@@ -165,8 +190,8 @@ class OverzichtController extends Controller
 
           }
         $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
-        if (!(($i==$days-1) && (strcmp($psd,'VM')==0)))
-          if ($dagDeel->status==DagDeel::AVAILABLE)
+        if (!(($i==$days-1) && (strcmp($ped,'VM')==0)))
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($periodeArray[strtoupper($dagDeel->naam)]==1))
           {
             //Log::debug('NM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;

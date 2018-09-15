@@ -11,7 +11,8 @@
 
         <div class="col badge badge-primary">
           <h2 class="text-center">
-          Plan een periode voor <span class="badge badge-light">{{$periode->leerkracht->naam}}</span> in <span class="badge badge-light">{{$periode->school->naam}}</span>
+          Plan een periode voor <span class="badge badge-light">{{$periode->leerkracht->naam}}</span>
+           {{-- in <span class="badge badge-light">{{$periode->school->naam}}</span> --}}
           </h2>
         </div>
 
@@ -22,7 +23,8 @@
       <input type="hidden" name="school_id" value="{{$periode->school_id or old('school_id')}}">
       <input type="hidden" name="leerkracht_id" value="{{$periode->leerkracht_id or old('leerkracht_id')}}">
       <input type="hidden" name="heleDag" value="1">
-      <input type="hidden" name="periode_id" value="{{$periode->id}}">
+      <input type="hidden" name="id" value="{{$periode->id}}">
+      <input type="hidden" name="status_id" value="2">
 
       <br>
       <div class="form-row">

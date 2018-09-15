@@ -47,15 +47,15 @@ class PeriodeController extends Controller
         $periode->stop = $datum;
         $periode->ambt = $leerkracht->ambt;
 
-        $school = School::find(1);
+        $scholenlijst = School::all()->pluck('naam','id');
 
-        $periode->aantal_uren_van_titularis = $school->school_type->noemer;
+        $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
         $ambts = Ambt::pluck('naam','id');
 
         $statuses = Status::where('choosable',1)->get();
 
         $scholen = CalculationController::totalsForCurrentUser();
-        return view('periode.create',compact('periode','statuses','ambts','scholen'));
+        return view('periode.create',compact('periode','statuses','ambts','scholen','scholenlijst'));
     }
 
     /**
@@ -99,8 +99,9 @@ class PeriodeController extends Controller
         $ambts = Ambt::pluck('naam','id');
         //Log::debug('edit route');
         //Log::debug(compact('periode'));
+        $scholenlijst = School::all()->pluck('naam','id');
         $scholen = CalculationController::totalsForCurrentUser();
-        return view('periode.edit',compact(['periode','statuses','ambts','scholen']));
+        return view('periode.edit',compact(['periode','statuses','ambts','scholen','scholenlijst']));
     }
 
     /**
@@ -126,7 +127,14 @@ class PeriodeController extends Controller
       return $value;
     }
 
+    function fromRequestCB($name){
+      $value = $this->fromRequest($name);
+      if (is_null($value)) $value = 0;
+      return $value;
+    }
+
     private function fillPeriode(Request $request,Periode $periode){
+
 
       $periode->start = Carbon::parse($this->fromRequest('start'));
       $periode->startDagDeel = $this->fromRequest('startDagDeel');
@@ -139,6 +147,18 @@ class PeriodeController extends Controller
       $periode->opmerking = $this->fromRequest('opmerking');
       $periode->heleDag = $this->fromRequest('heleDag');
       $periode->ambt = $this->fromRequest('ambt');
+
+      $periode->MA_VM = $this->fromRequestCB('MA_VM');
+      $periode->DI_VM = $this->fromRequestCB('DI_VM');
+      $periode->WO_VM = $this->fromRequestCB('WO_VM');
+      $periode->DO_VM = $this->fromRequestCB('DO_VM');
+      $periode->VR_VM = $this->fromRequestCB('VR_VM');
+      $periode->MA_NM = $this->fromRequestCB('MA_NM');
+      $periode->DI_NM = $this->fromRequestCB('DI_NM');
+      $periode->DO_NM = $this->fromRequestCB('DO_NM');
+      $periode->VR_NM = $this->fromRequestCB('VR_NM');
+
+
       $uren = $this->calculateUren()['uren'];
 
       Log::debug('Uren=');

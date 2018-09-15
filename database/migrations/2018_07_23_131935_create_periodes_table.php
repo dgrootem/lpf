@@ -36,6 +36,16 @@ class CreatePeriodesTable extends Migration
 
             $table->integer('berekendeUren');
 
+            $table->smallInteger('MA_VM')->nullable();
+            $table->smallInteger('MA_NM')->nullable();
+            $table->smallInteger('DI_VM')->nullable();
+            $table->smallInteger('DI_NM')->nullable();
+            $table->smallInteger('WO_VM')->nullable();
+            $table->smallInteger('DO_VM')->nullable();
+            $table->smallInteger('DO_NM')->nullable();
+            $table->smallInteger('VR_VM')->nullable();
+            $table->smallInteger('VR_NM')->nullable();
+
             $table->timestamps();
 
             $table->foreign('school_id')->references('id')->on('schools');
