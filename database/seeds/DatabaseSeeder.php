@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SchoolSeeder::class);
         $this->call(LeerkrachtSeeder::class);
         $this->call(StatusSeeder::class);
+        $this->call(DOTWSeeder::class);
         //$this->call(UserSeeder::class);
         //create links between teachers and schools
         //$this->call(LeerkrachtSchoolSeeder::class);

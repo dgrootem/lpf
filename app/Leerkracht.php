@@ -15,6 +15,11 @@ class Leerkracht extends Model
         return $this->belongsTo(Ambt::class);
     }
 
+    public function aanstellingen(){
+      return $this->hasMany(Aanstelling::class);
+    }
+
+/*
     public function scopeBelongsToSchool($query,$school_id){
       return $query->where('MA_VM',$school_id)
                    ->orWhere('MA_NM',$school_id)
@@ -55,7 +60,7 @@ class Leerkracht extends Model
     public function vr_nm(){
       return $this->belongsTo(School::class,'VR_NM','id');
     }
-
+*/
     /*
     public function schools(){
       return $this->belongsTo(School::class,'MA_VM')

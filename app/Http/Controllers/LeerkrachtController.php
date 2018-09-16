@@ -63,7 +63,8 @@ class LeerkrachtController extends Controller
     public function edit(Leerkracht $leerkracht)
     {
       $beschikbarescholen = School::all();
-      return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen']));
+      $dagen = DOTW::all();
+      return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen']));
     }
 
     /**
