@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<form class="form" action="/leerkracht/{{$leerkracht->id}}" method="post">
+<form class="form" action="{{url('/leerkracht/'.$leerkracht->id)}}" method="post">
   <input name="_method" type="hidden" value="PUT">
 
 

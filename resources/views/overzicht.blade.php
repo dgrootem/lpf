@@ -6,10 +6,10 @@
     <thead>
     <tr>
       <th>
-        <a href="/overzichten/{{$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d')}}">
+        <a href="{{url('/overzichten/'.$startOfRange->copy()->addDays(-env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d'))}}">
           <span class="fa fa-2x fa-angle-up"></span>
         </a>
-        <a href="/overzichten/{{$startOfRange->copy()->addDays(env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d')}}">
+        <a href="{{url('/overzichten/'.$startOfRange->copy()->addDays(env('NBDAYS_IN_OVERZICHT'))->format('Y-m-d'))}}">
           <span class="fa fa-2x fa-angle-down"></span>
         </a>
       </th>

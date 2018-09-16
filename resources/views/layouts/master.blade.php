@@ -22,8 +22,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{asset('css/clickable-cells.css')}}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}" >
+    <link rel="stylesheet" href="{{asset('css/clickable-cells.css?v='.Cache::get('js_version_number'))}}">
     @yield('stylesheets')
 
     <title>{{ config('app.name', 'LPF') }}</title>
