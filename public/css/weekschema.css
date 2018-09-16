@@ -1,0 +1,53 @@
+/* For small screen */
+.alternate-row-colors :nth-child(even){
+  background-color: #dcdcdc;
+}
+.alternate-row-colors :nth-child(odd){
+  background-color: #aaaaaa;
+}
+
+.dlk-radio input[type="radio"],
+.dlk-radio input[type="checkbox"]
+{
+	margin-left:-99999px;
+	display:none;
+}
+.dlk-radio input[type="radio"] + .fa ,
+.dlk-radio input[type="checkbox"] + .fa {
+     opacity:0.0
+}
+.dlk-radio input[type="radio"]:checked + .fa,
+.dlk-radio input[type="checkbox"]:checked + .fa{
+    opacity:1
+}
+
+.dlk-radio btn > input:checked{
+  opacity: 1
+}
+
+.dlk-radio btn > input {
+  opacity: 0
+}
+
+
+
+/* For medium screen
+@media (min-width: 768px) {
+    .alternate-row-colors :nth-child(4n), .alternate-row-colors :nth-child(4n-1) {
+        background: #dcdcdc;
+    }
+    .alternate-row-colors :nth-child(4n-2), .alternate-row-colors :nth-child(4n-3) {
+        background: #aaaaaa;
+    }
+}
+
+/* For large screen
+@media (min-width: 992px) {
+    .alternate-row-colors :nth-child(6n), .alternate-row-colors :nth-child(6n-1), .alternate-row-colors :nth-child(6n-2) {
+        background: #dcdcdc;
+    }
+    .alternate-row-colors :nth-child(6n-3), .alternate-row-colors :nth-child(6n-4), .alternate-row-colors :nth-child(6n-5) {
+        background: #aaaaaa;
+    }
+}
+*/
