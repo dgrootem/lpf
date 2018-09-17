@@ -216,9 +216,10 @@ class PeriodeController extends Controller
       return compact('result');
     }
 
-    public static function canBeChosen($periode,$dagDeel){
-      $a = $periode->leerkracht->toArray();
-      return (is_null($a[$dagDeel]) || (!in_array($a[$dagDeel],Auth::user()->schools()->pluck('id')->toArray())));
+    public static function canBeChosen($periode,$dag,$deel,$volgorde){
+      $a = $periode->leerkracht->aanstelling->weekschemas[$volgorde]->dagdelen()->where('dag',$dag)->where('deel',$deel)->first();
+      return (in_array($a->school_id,Auth::user()->schools()->pluck('id')->toArray()));
+      //return (is_null($a[$dagDeel]) || (!in_array($a[$dagDeel],Auth::user()->schools()->pluck('id')->toArray())));
     }
 
 

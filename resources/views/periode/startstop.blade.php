@@ -1,5 +1,5 @@
 <!-- <div class="form-row"> -->
-  <div class="form-group col-md-6">
+  {{-- <div class="form-group col-md-6"> --}}
     <div class="card">
       <h5 class="card-header">Data</h5>
     <!-- <div class="col"> -->
@@ -63,5 +63,5 @@
         <div id="berekenUren" class="error" aria-live="polite"></div>
       </div>
     </div>
-  </div>
+  {{-- </div> --}}
 <!-- </div> -->

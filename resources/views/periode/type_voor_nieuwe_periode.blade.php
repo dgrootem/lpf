@@ -1,6 +1,7 @@
-<div class="form-group col-md-6">
+{{-- <div class="form-group col-md-6"> --}}
   <div class="card">
-    <h5 class="card-header">Weekschema</h5>
+    @foreach ($periode->leerkracht->aanstellingen->first()->weekschemas as $key => $weekschema)
+    <h5 class="card-header">Weekschema {{$weekschema->volgorde}}</h5>
   <!-- <div class="col"> -->
     <div class="card-body">
       <p class="card-text">
@@ -38,16 +39,9 @@
         </div>
       </p>
     </div>
+    @endforeach
   </div>
-</div>
-<div class="form-group col-md-6">
-  <div class="card">
-    <h5 class="card-header">Opmerking</h5>
-  <!-- <div class="col"> -->
-    <div class="card-body">
-      <p class="card-text">
-        <textarea class="form-control" id="opmerking" value="opmerking" rows="3">{{$periode->opmerking}}</textarea>
-      </p>
-    </div>
-  </div>
-</div>
+{{-- </div> --}}
+{{-- <div class="form-group col-md-6"> --}}
+  
+{{-- </div> --}}

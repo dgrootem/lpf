@@ -1,5 +1,5 @@
 <!-- <div class="form-row"> -->
-<div class="form-group col-md-6">
+{{-- <div class="form-group col-md-6"> --}}
   <div class="card">
     <h5 class="card-header">Opdracht</h5>
   <!-- <div class="col"> -->
@@ -45,4 +45,4 @@
       </p>
   </div>
   </div>
-</div>
+{{-- </div> --}}
