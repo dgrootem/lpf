@@ -63,6 +63,7 @@ class LeerkrachtController extends Controller
     public function edit(Leerkracht $leerkracht)
     {
       $beschikbarescholen = School::all();
+      $leerkracht->load('aanstellingen.weekschemas.dagdelen'); //eager load all nested relationships
       $dagen = DOTW::all();
       return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen']));
     }
