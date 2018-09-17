@@ -1,5 +1,9 @@
 @extends('layouts.master');
 
+@section('stylesheets')
+<link rel="stylesheet" href="{{ asset('css/user.css?v='.Cache::get('js_version_number'))}}" >
+@endsection
+
 @section('content')
 
   <h2>Welkom {{$user->name}}</h2>
@@ -21,7 +25,8 @@
         @endif
         >
       <label class="form-check-label" for="checkBox-{{$school->id}}">
-        {{$school->naam}} ({{$school->adres}})
+        <span class="badge schoolbadge">[{{$school->afkorting}}]</span>
+         {{$school->naam}} ({{$school->adres}})
       </label>
     </div>
   @endforeach
