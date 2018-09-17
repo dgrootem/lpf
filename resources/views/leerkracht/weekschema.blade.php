@@ -54,8 +54,8 @@
                           @foreach($dagen as $dag)
                           <div class="p-2 bd-highlight flex-fill">
                             <label class="btn mycontainer">
-                              <input type="radio" value="{{$school->id}}" name="W{{$weekschema->volgorde}}_{{strtoupper($dag->naam)}}_VM"
-                              @if($leerkracht->MA_VM==$school->id) checked @endif class="form-control voormiddag dagdeel" >
+                              <input type="radio" value="{{$school->id}}" name="Week{{$weekschema->volgorde}}_{{strtoupper($dag->naam)}}_VM"
+                              @if($weekschema->voormiddagen()[$dag->naam]==$school->id) checked @endif class="form-control voormiddag dagdeel" >
                               <span class="mycheckmark"></span>
                             </label>
                           </div>
@@ -64,9 +64,14 @@
 
                         <div class="dlk-radio btn-group d-flex flex-row bd-highlight mb-0">
                           @foreach($dagen as $dag)
-                          <div class="p-2 bd-highlight flex-fill">
+
+                          <div class="p-2 bd-highlight flex-fill @if($dag->naam === 'wo') invisible @endif">
                             <label class="btn mycontainer">
-                              <input type="radio" value="{{$school->id}}" name="W{{$weekschema->volgorde}}{{strtoupper($dag->naam)}}_NM" @if($leerkracht->MA_VM==$school->id) checked @endif class="form-control namiddag dagdeel" >
+                              <input type="radio" value="{{$school->id}}" name="Week{{$weekschema->volgorde}}_{{strtoupper($dag->naam)}}_NM"
+                              @if(!($dag->naam === 'wo'))
+                                @if($weekschema->namiddagen()[$dag->naam]==$school->id) checked @endif
+                              @endif
+                              class="form-control namiddag dagdeel" >
                               <span class="mycheckmark"></span>
                             </label>
                           </div>

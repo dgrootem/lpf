@@ -74,7 +74,7 @@ $(document).ready(function () {
 
     var items = $("#collapse"+count).find(".dagdeel");
     //var items = document.getElementsByClassName('dagdeel');
-    items.each(function (k,i){ $(this).attr('name',$( this ).attr('name').replace('W1','W'+count));});
+    items.each(function (k,i){ $(this).attr('name',$( this ).attr('name').replace('Week1','Week'+count));});
 
     var a =$("#accordion").children().sort(function(a,b){if (a.id > b.id) return 1; else return -1;});
     $("#accordion").append(a);
