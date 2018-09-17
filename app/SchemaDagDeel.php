@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class SchemaDagDeel extends Model
 {
     //
+    protected $table = 'schemadagdeel';
+
     public function weekschema(){
       return $this->belongsTo(Weekschema::class);
     }

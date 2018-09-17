@@ -12,10 +12,10 @@ class DOTWSeeder extends Seeder
     public function run()
     {
         //
-        DB::table('dotws')->insert(['naam' => 'ma']);
-        DB::table('dotws')->insert(['naam' => 'di']);
-        DB::table('dotws')->insert(['naam' => 'wo']);
-        DB::table('dotws')->insert(['naam' => 'do']);
-        DB::table('dotws')->insert(['naam' => 'vr']);
+        DB::table('dotws')->insert(['volgorde' => 1 ,'naam' => 'ma']);
+        DB::table('dotws')->insert(['volgorde' => 2 ,'naam' => 'di']);
+        DB::table('dotws')->insert(['volgorde' => 3 ,'naam' => 'wo']);
+        DB::table('dotws')->insert(['volgorde' => 4 ,'naam' => 'do']);
+        DB::table('dotws')->insert(['volgorde' => 5 ,'naam' => 'vr']);
     }
 }

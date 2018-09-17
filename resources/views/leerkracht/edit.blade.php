@@ -12,109 +12,20 @@
   @csrf
   <div class="container">
     <div class="row">
+      <button type="button" class="btn btn-success" id="addWeekschema">Nieuw weekschema</button>
       <div class="col badge badge-primary btn-block"><h2>{{$leerkracht->naam}}</h2></div>
     </div>
     <div class="row">
-      <table class="table">
-        <tbody>
-          @foreach ($beschikbarescholen as $key => $school)
-          <tr>
-            <div class="container">
-              <div class="row border align-items-center">
-                <div class="col-3 ">
-                  {{$school->naam}}
-                </div>
-                <div class="col-9">
-                  <div class="container">
-                    <div class="row ">
-                      <div class="col-2">
-                        <div class="p-2 bd-highlight flex-fill invisible">BB</div>
-                        <div class="p-2 bd-highlight flex-fill">VM</div>
-                        <div class="p-2 bd-highlight flex-fill">NM</div>
-                      </div>
-                      <div class="col">
-                        <div class="d-flex flex-row bd-highlight mb-0 ">
-                          <div class="p-2 bd-highlight flex-fill">MA</div>
-                          <div class="p-2 bd-highlight flex-fill">DI</div>
-                          <div class="p-2 bd-highlight flex-fill">WO</div>
-                          <div class="p-2 bd-highlight flex-fill">DO</div>
-                          <div class="p-2 bd-highlight flex-fill">VR</div>
-                        </div>
-                        <div class="dlk-radio btn-group d-flex flex-row bd-highlight mb-0">
-                          <div class="p-2 bd-highlight flex-fill border">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="MA_VM" @if($leerkracht->MA_VM==$school->id) checked @endif class="form-control" >
-                              <i class="fa fa-check fa-large glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="DI_VM" @if($leerkracht->DI_VM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="WO_VM" @if($leerkracht->WO_VM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="DO_VM" @if($leerkracht->DO_VM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="VR_VM" @if($leerkracht->VR_VM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                        </div>
-                        <div class="dlk-radio btn-group d-flex flex-row bd-highlight mb-0">
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="MA_NM" @if($leerkracht->MA_NM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="DI_NM" @if($leerkracht->DI_NM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block invisible">
-                              <input type="radio" value="0" name="WO_NM" disabled class="invisible">
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="DO_NM" @if($leerkracht->DO_NM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                          <div class="p-2 bd-highlight flex-fill">
-                            <label class="btn btn-primary btn-block">
-                              <input type="radio" value="{{$school->id}}" name="VR_NM" @if($leerkracht->VR_NM==$school->id) checked @endif >
-                              <i class="fa fa-check glyphicon glyphicon-ok"></i>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </tr>
+      <div id="accordion">
+        @foreach($leerkracht->aanstellingen as $aanstelling)
+          @foreach($aanstelling->weekschemas as $weekschema)
+            @include('leerkracht.weekschema')
+          @endforeach
         @endforeach
-      </tbody>
+      </div>
       </div>
     </div>
+  </div>
 
 
 
@@ -131,4 +42,38 @@
   </div>
   </div>
 </form>
+@endsection
+
+
+
+@section('page-specific-scripts')
+<script type="text/javascript">
+$(document).ready(function () {
+  $('#addWeekschema').on('click',function(){
+    var myclone = $('#weekschema1').clone();
+    var count = $("#accordion").children().length +1;
+    myclone.attr('id','weekschema'+count);
+    myclone.appendTo("#accordion");
+
+    $("#weekschema" + count + " > .card-header").attr('id','heading'+count);
+    $("#weekschema" + count + " > .card-header").attr('data-target','collapse'+count);
+    $("#weekschema" + count + " > .card-header").attr('aria-controls','collapse'+count);
+
+    $("#weekschema" + count + " > .card-header >h5 > button").attr('id','toggleButton'+count);
+
+    $("#weekschema" + count + " > #collapse1").attr('aria-labelledby','heading'+count);
+    $("#weekschema" + count + " > #collapse1").attr('id','collapse'+count);
+
+
+    $("#toggleButton"+count).html('Weekschema week '+count);
+
+    $("#collapse "+count+" > div > div:nth-child(1) > div > div.col-9 > div > div > div.col > div:nth-child(3) > div:nth-child(3) ")
+
+    var items = $("#collapse "+count).find(".dagdeel");
+    //var items = document.getElementsByClassName('dagdeel');
+    items.each(function (k,i){ $(this).attr('name',$( this ).attr('name').replace('W1','W'+count));});
+    
+  });
+});
+</script>
 @endsection

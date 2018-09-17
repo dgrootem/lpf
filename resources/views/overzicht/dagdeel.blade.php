@@ -19,7 +19,7 @@
   @endif
   >
   @if ($dagDeel->status!=\App\DagDeel::UNAVAILABLE)
-    {{$dagDeel->school->naam}}
+    {{$dagDeel->school->afkorting}}
   @endif
 
 </td>

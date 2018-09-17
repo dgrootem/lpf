@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Weekschema extends Model
 {
     //
+    protected $table = 'weekschema';
+
     public function aanstelling(){
       return $this->belongsTo(Aanstelling::class);
     }

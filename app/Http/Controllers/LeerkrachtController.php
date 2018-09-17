@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 
 use App\Leerkracht;
 use App\School;
+use App\DOTW;
+use App\Aanstelling;
+use App\Weekschema;
+
+use Carbon\Carbon;
 
 use Log;
 
@@ -64,6 +69,22 @@ class LeerkrachtController extends Controller
     {
       $beschikbarescholen = School::all();
       $leerkracht->load('aanstellingen.weekschemas.dagdelen'); //eager load all nested relationships
+      //als de leerkracht nog geen aanstelling (en dus ook geen weekschemas) heeft
+      //  creeren we een blanco versie
+      if (!isset($leerkracht->aanstellingen) || $leerkracht->aanstellingen->isEmpty())
+      {
+        $aanstelling = new Aanstelling;
+        $aanstelling->start = Carbon::parse(Carbon::today()->year . '-10-01');
+        $leerkracht->aanstellingen()->save($aanstelling);
+        $weekschema = new Weekschema;
+        $aanstelling->weekschemas()->save($weekschema);
+
+        //reload relationships
+        $leerkracht = $leerkracht->load('aanstellingen.weekschemas.dagdelen');
+        //return compact('leerkracht','aanstelling');
+      }
+      //$leerkracht = $leerkracht->fresh()->with('aanstellingen.weekschemas.dagdelen');
+      //return compact('leerkracht','aanstelling');
       $dagen = DOTW::all();
       return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen']));
     }
