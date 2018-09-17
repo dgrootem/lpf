@@ -15,6 +15,7 @@ class CreateDOTWsTable extends Migration
     {
         Schema::create('dotws', function (Blueprint $table) {
             $table->string('naam')->primary();
+            $table->integer('volgorde')->unique();
         });
     }
 

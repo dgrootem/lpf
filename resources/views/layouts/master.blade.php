@@ -37,7 +37,7 @@
       </div>
     </main>
     @include('layouts.footer')
-    @include('chart');
+    @include('chart')
     @yield('page-specific-scripts')
   </body>
 </html>
