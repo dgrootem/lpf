@@ -34,15 +34,6 @@
               @endforeach
             ],
             backgroundColor: "#f8f9fa"},
-          {
-            label: "ZT",
-            data: [
-
-              @foreach ($scholen as $key => $school)
-                {{$school['ZT']}},
-              @endforeach
-            ],
-            backgroundColor: "#ffc107" }
         ]
       },
       options: {
