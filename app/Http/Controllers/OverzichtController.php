@@ -49,14 +49,27 @@ class OverzichtController extends Controller
 
   private function fillDagDeel($school,$dagdeel)
   {
+    Log::debug("Filling dagdeel");
     $dagdeel->school = $school;
-    if ((is_null($school)) || ($school->id==1)) $dagdeel->status = DagDeel::UNAVAILABLE;
-    else $dagdeel->status = DagDeel::AVAILABLE;
+
+    if ((is_null($school)) || ($school->id==1))
+      $dagdeel->status = DagDeel::UNAVAILABLE;
+    else {
+      $dagdeel->status = DagDeel::AVAILABLE;
+      Log::debug("School=".$dagdeel->school);
+    }
 
     return $dagdeel;
   }
+/*
+  private function datumStatus($datum,$leerkracht,$firstweek){
 
-  private function datumStatus($datum,$leerkracht){
+    $weekTeller = $datum->weekOfYear - $firstweek; //TODO: fixen voor na januari
+
+    $aantalWeekSchemas = $leerkracht->aanstellingen->first()->weekschemas->count();
+    $huidigeWeek = $weekTeller % $aantalWeekSchemas +1; //we tellen Week1 , Week2, ... terwijl mod functie begint bij 0
+
+    $weekschema = $leerkracht->aanstellingen->first()->weekschemas->where('volgorde',$huidigeWeek);
 
     $dagnr = $datum->dayOfWeek;
     //Log::debug("dag van de week=".$dag);
@@ -92,8 +105,10 @@ class OverzichtController extends Controller
     return $dag;
 
   }
+  */
 
   public function range($startDate = null){
+    $firstweek = Carbon::parse("first monday of september")->weekOfYear;
 
     if (isset($startDate))
       $startOfRange = Carbon::parse($startDate);
@@ -104,7 +119,7 @@ class OverzichtController extends Controller
 
     setlocale(LC_TIME,'nl-BE');
     $format = '%d-%m-%Y';
-    $leerkrachten = Leerkracht::where('actief',1)->get();
+    $leerkrachten = Leerkracht::where('actief',1)->with('aanstellingen.weekschemas.dagdelen.school')->get();
     $nbdays=env('NBDAYS_IN_OVERZICHT');
 
     $stopOfRange = clone $startOfRange;
@@ -117,40 +132,100 @@ class OverzichtController extends Controller
       foreach ($leerkrachten as $key => $leerkracht) {
         $vm = new DagDeel;
         $nm = new DagDeel;
-
-        /*
-        $dateStatus = $this->datumStatus($datumIterator,$leerkracht);
-
-        $vm->school = $dateStatus['VM'];
-        if (is_null($vm->school)) $vm->status = DagDeel::UNAVAILABLE;
-        else $vm->status = DagDeel::AVAILABLE;
-
-        $nm->school = $dateStatus['NM'];
-        if (is_null($nm->school)) $nm->status = DagDeel::UNAVAILABLE;
-        else $nm->status = DagDeel::AVAILABLE;
-        */
-
-        $dag = $this->datumStatus($datumIterator,$leerkracht);
-
-        $tempArray['VM'][$leerkracht->id] = $dag->vm;
-        $tempArray['NM'][$leerkracht->id] = $dag->nm;
-
-        Log::debug($vm->school);
-        Log::debug($nm->school);
-
+        $tempArray['VM'][$leerkracht->id] = $vm;
+        $tempArray['NM'][$leerkracht->id] = $nm;
+        $dateRange[$datumIterator->formatLocalized($format)] = $tempArray;
       }
+      $datumIterator->addDays(1);
+    }
+    //return($dateRange);
+
+
+//kan zeker geoptimaliseerd worden door bijvoorbeeld altijd een periode te starten op een maandag?
+    foreach($leerkrachten as $key => $leerkracht){
+      $aantalAanstellingen = $leerkracht->aanstellingen->count();
+      if ($aantalAanstellingen!=0){
+        $aantalWeekSchemas = $leerkracht->aanstellingen->first()->weekschemas->count();
+        Log::debug("aantal aanstellingen=".$aantalAanstellingen) ;
+        Log::debug("aantal weekschemas=".$aantalWeekSchemas);
+      }
+      else {
+        $aantalWeekSchemas = 0;
+      }
+
+      $currentWeekTeller = -1;
+      $datumIterator = clone $startOfRange;
+      $huidigeWeek = null;
+      $weekschema = null;
+      $voormiddagen = null;
+      $namiddagen = null;
+      for ($i=0; $i < $nbdays; $i++) {
+        $formattedDate = $datumIterator->formatLocalized($format);
+        Log::debug($formattedDate);
+        //trivial case
+        if ($aantalAanstellingen == 0){
+          Log::debug("Geen aanstelling..skip");
+          $dateRange[$formattedDate]['VM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+          $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+          $datumIterator->addDays(1);
+          continue;
+        }
+
+        $dagnr=$datumIterator->dayOfWeek;
+        //skip zaterdag en zondag
+        if (($dagnr==0) || ($dagnr==6))
+        {
+          $dateRange[$formattedDate]['VM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+          $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+          $datumIterator->addDays(1);
+          continue;
+        }
+        //zet woensdagnamiddag op unavailable
+        if ($dagnr==3)
+          $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+
+        //bepaal het weekschema - we halen dit enkel op wanneer we van week veranderen
+        $weekTeller = $datumIterator->weekOfYear - $firstweek; //TODO: fixen voor na januari
+        if ((($currentWeekTeller != $weekTeller) && ($aantalWeekSchemas>1))|| (!isset($weekschema)))
+        {
+          $currentWeekTeller = $weekTeller;
+          $huidigeWeek = $weekTeller % $aantalWeekSchemas +1; //we tellen Week1 , Week2, ... terwijl mod functie begint bij 0
+
+          $weekschema = $leerkracht->aanstellingen->first()->weekschemas->where('volgorde',$huidigeWeek)->first();
+          //Log::debug("NIEUWE WEEK");
+          //Log::debug($weekschema);
+          $voormiddagen = $weekschema->voormiddagenFull()->get();
+          $namiddagen = $weekschema->namiddagenFull()->get();
+        }
+        foreach($voormiddagen as $vm)
+        {
+          Log::debug($vm);
+          if ($vm->dag === $this->shortDayOfWeek($dagnr))
+            $this->fillDagDeel($vm->school,$dateRange[$formattedDate]['VM'][$leerkracht->id]);
+        }
+
+        foreach($namiddagen as $nm)
+          if ($nm->dag === $this->shortDayOfWeek($dagnr))
+            $this->fillDagDeel($nm->school,$dateRange[$formattedDate]['NM'][$leerkracht->id]);
+
+        $datumIterator->addDays(1);
+      }
+
+    }
+
+
       //Log::debug("TEMPARRAY=");
       //Log::debug($tempArray['VM']);
       //increment the $startdate by 1 in each iteration (addDays is a mutator)
-      $dateRange[$datumIterator->formatLocalized($format)] = $tempArray;
-      $datumIterator->addDays(1);
-    }
+
+
+
 
     //DB::listen(function ($query) {
     //   Log::debug($query->sql);
     // });
-    Log::debug($startOfRange);
-    Log::debug($stopOfRange);
+    //Log::debug($startOfRange);
+    //Log::debug($stopOfRange);
     $periodesInRange = Periode::periodesInRange($startOfRange->format('Y-m-d'),
                                                 $stopOfRange->format('Y-m-d'))->get();
     // DB::listen(function ($query) {

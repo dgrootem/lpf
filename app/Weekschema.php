@@ -18,10 +18,18 @@ class Weekschema extends Model
     }
 
     public function scopeVoormiddagen($query){
-      return SchemaDagDeel::where('weekschema_id',$this->id)->where('deel','VM')->pluck('school_id','dag');
+      return Weekschema::voormiddagenFull($query)->pluck('school_id','dag')->toArray();
+    }
+
+    public function scopeVoormiddagenFull($query){
+      return SchemaDagDeel::where('weekschema_id',$this->id)->where('deel','VM');
     }
 
     public function scopeNamiddagen($query){
-      return SchemaDagDeel::where('weekschema_id',$this->id)->where('deel','NM')->pluck('school_id','dag')->toArray();
+      return Weekschema::namiddagenFull($query)->pluck('school_id','dag')->toArray();
+    }
+
+    public function scopeNamiddagenFull($query){
+      return SchemaDagDeel::where('weekschema_id',$this->id)->where('deel','NM');
     }
 }

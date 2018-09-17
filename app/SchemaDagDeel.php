@@ -20,4 +20,6 @@ class SchemaDagDeel extends Model
     public function dag(){
       return $this->belongsTo(DOTW::class);
     }
+
+  
 }
