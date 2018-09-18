@@ -21,5 +21,5 @@ class SchemaDagDeel extends Model
       return $this->belongsTo(DOTW::class);
     }
 
-  
+
 }

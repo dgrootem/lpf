@@ -8,11 +8,17 @@ use App\Leerkracht;
 use App\Status;
 use App\Periode;
 use App\Ambt;
+use App\PeriodeWeekSchema;
+use App\PeriodeDagDeel;
+use App\DagDeel;
+use App\DOTW;
+use App\SchemaDagDeel;
 
 use Illuminate\Support\Facades\Auth;
 
 use Carbon\Carbon;
 use Log;
+use DB;
 
 class PeriodeController extends Controller
 {
@@ -29,6 +35,26 @@ class PeriodeController extends Controller
     }
 
 
+    private function addDagDeel($schemaDagdeel){
+      $periodeDagDeel = array();
+      Log::debug($schemaDagdeel);
+      Log::debug(Auth::user()->schools);
+      if (in_array($schemaDagdeel->school_id,Auth::user()->schools->pluck('id')->toArray()))
+      {
+        $periodeDagDeel["status"] = DagDeel::AVAILABLE;
+        Log::debug("AVAILABLE");
+      }
+      else{
+        $periodeDagDeel["status"] = DagDeel::UNAVAILABLE;
+        Log::debug("UNAVAILABLE");
+      }
+      //koppel PeriodeDagDeel aan SchemaDagDeel
+      $periodeDagDeel["dagdeel"] = $schemaDagdeel;
+      //$periodeDagDeel["volgorde"] = $schemaDagdeel->dag->volgorde;
+      //$periodeWeekSchema->dagdelen->add($periodeDagDeel);
+      return $periodeDagDeel;
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -38,7 +64,9 @@ class PeriodeController extends Controller
     public function create()
     {
 
-        $leerkracht = Leerkracht::find(request('leerkracht'));
+        $leerkracht = Leerkracht::find(request('leerkracht'))->with('aanstellingen.weekschemas.dagdelen.dag')->first();
+        //return $leerkracht;
+        //$leerkracht->load('aanstelling.weekschemas.dagdelen');
         $datum = request("datum");
         if (is_null($datum)) $datum = Carbon::today()->setTime(0,0,0);
         $periode = new Periode;
@@ -49,15 +77,86 @@ class PeriodeController extends Controller
         $periode->stop = $datum;
         $periode->ambt = $leerkracht->ambt;
 
-        $scholenlijst = School::alle()->pluck('naam','id');
+        $weekschemas = array();
 
-        $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
-        $ambts = Ambt::pluck('naam','id');
+        //DB::beginTransaction();
+        //try{
+          //$periode->save();
+          //$periode->weekschemas = new Collection;
 
-        $statuses = Status::where('choosable',1)->get();
+          //return $leerkracht->aanstellingen->first()->weekschemas;
+          //$periode->weekschemas = new \Illuminate\Database\Eloquent\Collection;
+          foreach($leerkracht->aanstellingen->first()->weekschemas as $ws)
+          {
+            $pws = array("volgorde" => $ws->volgorde);
+            $dagdelen = array();
+            foreach ($ws->dagdelen as $sdagdeel) {
+              $dagdelen[] = $this->addDagDeel($sdagdeel);
+              //return $dagdelen;
+            }
 
-        $scholen = CalculationController::totalsForCurrentUser();
-        return view('periode.create',compact('periode','statuses','ambts','scholen','scholenlijst'));
+            $periodeDagDeel = array();
+            $woensdagnm = new SchemaDagDeel;
+            $woensdagnm->dag = DOTW::where('naam','wo')->first();
+            //return $woensdagnm->dag;
+            $woensdagnm->deel = 'NM';
+            $woensdagnm->school_id = 1;
+
+            $periodeDagDeel["status"] = DagDeel::UNAVAILABLE;
+            $periodeDagDeel["dagdeel"] = $woensdagnm;
+            $periodeDagDeel["volgorde"] = $woensdagnm->dag->volgorde;
+            //return $woensdagnm;
+
+            $dagdelen[]  =$this->addDagDeel($woensdagnm);
+
+            $pws["dagdelen"] = $dagdelen;
+            $weekschemas[] = $pws;
+            //Log::debug($pws);
+          }
+
+
+          $scholenlijst = School::alle()->pluck('naam','id');
+
+          //TODO: in javascript de juiste ophalen
+          $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
+          $ambts = Ambt::pluck('naam','id');
+
+          //$statuses = Status::where('choosable',1)->get();
+
+          $scholen = CalculationController::totalsForCurrentUser();
+        // }catch(\Exception $e){
+        //   //DB::rollback();
+        //   throw $e;
+        // }
+        //return $periode;
+        $dagen = DOTW::orderBy('volgorde')->get();
+        $user = Auth::user()->load('schools');
+        //return $weekschemas;
+        //return PeriodeController::namiddagen($periode->weekschemas->first());
+
+        return view('periode.create',compact('periode','ambts','scholen','scholenlijst','dagen'));
+    }
+
+
+    public static function voormiddagen($weekschema){
+      $result = array();
+      foreach($weekschema->dagdelen as $dagdeel)
+        if ($dagdeel->dagdeel->deel === "VM")
+          $result[] = $dagdeel;
+      return $result;
+          /*
+      return array_filter($weekschema->dagdelen->load('dagdeel')->toArray(), function ($var){
+        return ($var["dagdeel"]["deel"] === 'VM');
+      });*/
+    }
+
+    public static function namiddagen($weekschema){
+      $result = array();
+      foreach($weekschema->dagdelen as $dagdeel)
+        if ($dagdeel->dagdeel->deel === "NM")
+          $result[] = $dagdeel;
+      return $result;
+
     }
 
     /**

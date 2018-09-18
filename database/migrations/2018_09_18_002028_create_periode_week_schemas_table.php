@@ -15,7 +15,11 @@ class CreatePeriodeWeekSchemasTable extends Migration
     {
         Schema::create('periode_week_schemas', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('periode_id');
+            $table->integer('volgorde');
             $table->timestamps();
+
+            $table->foreign('periode_id')->references('id')->on('periodes');
         });
     }
 

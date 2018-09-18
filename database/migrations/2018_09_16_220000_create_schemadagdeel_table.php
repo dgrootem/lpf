@@ -16,14 +16,14 @@ class CreateSchemadagdeelTable extends Migration
         Schema::create('schemadagdeel', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('weekschema_id');
-            $table->string('dag');
+            $table->unsignedInteger('dag_id');
             $table->string('deel'); //VM of NM
             $table->unsignedInteger('school_id');
             $table->timestamps();
 
             $table->foreign('weekschema_id')->references('id')->on('weekschema');
             $table->foreign('school_id')->references('id')->on('schools');
-            $table->foreign('dag')->references('naam')->on('dotws');
+            $table->foreign('dag_id')->references('id')->on('dotws');
         });
     }
 

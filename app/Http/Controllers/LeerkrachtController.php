@@ -94,6 +94,7 @@ class LeerkrachtController extends Controller
       }
       //$leerkracht = $leerkracht->fresh()->with('aanstellingen.weekschemas.dagdelen');
       //return compact('leerkracht','aanstelling');
+      //return $leerkracht->aanstellingen->first()->weekschemas->first()->voormiddagenFull()->get();
 
       return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen']));
     }
@@ -133,7 +134,7 @@ class LeerkrachtController extends Controller
               $a->load('weekschemas.dagdelen');
             }
             foreach($weekschema->dagdelen as $td)
-              if(($td->dag === $_d) && ($td->deel === $_p))
+              if(($td->dag->naam === $_d) && ($td->deel === $_p))
               {
                 Log::debug("Found dagdeel ".$_d ."_".$_p );
                 $td->school_id = $value;
@@ -166,7 +167,7 @@ class LeerkrachtController extends Controller
           Log::debug("Create ".$dag.'_'.$deel);
           $d = new SchemaDagDeel;
           $d->school_id = 1;
-          $d->dag = $dag->naam;
+          $d->dag_id = $dag->id;
           $d->deel = $deel;
           $weekschema->dagdelen()->save($d);
         }
@@ -176,6 +177,20 @@ class LeerkrachtController extends Controller
       });
       return $weekschema;
 
+    }
+
+    public static function voormiddagen($weekschema){
+      $result = array();
+      foreach($weekschema->voormiddagenFull()->get() as $dag)
+        $result[$dag->dag->naam] = $dag;
+      return $result;
+    }
+
+    public static function namiddagen($weekschema){
+      $result = array();
+      foreach($weekschema->namiddagenFull()->get() as $dag)
+        $result[$dag->dag->naam] = $dag;
+      return $result;
     }
 
     /**

@@ -14,7 +14,8 @@ class CreateDOTWsTable extends Migration
     public function up()
     {
         Schema::create('dotws', function (Blueprint $table) {
-            $table->string('naam')->primary();
+            $table->increments('id');
+            $table->string('naam');
             $table->integer('volgorde')->unique();
         });
     }

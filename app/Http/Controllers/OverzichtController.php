@@ -49,16 +49,15 @@ class OverzichtController extends Controller
 
   private function fillDagDeel($school,$dagdeel)
   {
-    Log::debug("Filling dagdeel");
     $dagdeel->school = $school;
-
     if ((is_null($school)) || ($school->id==1))
       $dagdeel->status = DagDeel::UNAVAILABLE;
     else {
       $dagdeel->status = DagDeel::AVAILABLE;
-      Log::debug("School=".$dagdeel->school);
     }
-
+    Log::debug("Filled dagdeel");
+    Log::debug("School=".$dagdeel->school);
+    Log::debug("Status=".$dagdeel->status);
     return $dagdeel;
   }
 /*
@@ -194,26 +193,36 @@ class OverzichtController extends Controller
           $weekschema = $leerkracht->aanstellingen->first()->weekschemas->where('volgorde',$huidigeWeek)->first();
           //Log::debug("NIEUWE WEEK");
           //Log::debug($weekschema);
-          $voormiddagen = $weekschema->voormiddagenFull()->get();
-          $namiddagen = $weekschema->namiddagenFull()->get();
+          $voormiddagen = LeerkrachtController::voormiddagen($weekschema);//->voormiddagenFull()->get();
+
+          $namiddagen = LeerkrachtController::namiddagen($weekschema);//->namiddagenFull()->get();
+
         }
+        $dateRange[$formattedDate]['VM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['VM'][$leerkracht->id]);
+        $dateRange[$formattedDate]['NM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['NM'][$leerkracht->id]);
+        /*
         foreach($voormiddagen as $vm)
         {
-          Log::debug($vm);
-          if ($vm->dag === $this->shortDayOfWeek($dagnr))
+          Log::debug($vm->dag->naam);
+          if ($vm->dag->naam === $this->shortDayOfWeek($dagnr))
             $this->fillDagDeel($vm->school,$dateRange[$formattedDate]['VM'][$leerkracht->id]);
+            Log::debug($dateRange[$formattedDate]['VM'][$leerkracht->id]);
         }
 
         foreach($namiddagen as $nm)
-          if ($nm->dag === $this->shortDayOfWeek($dagnr))
+        {
+          Log::debug($nm->dag->naam);
+          if ($nm->dag->naam === $this->shortDayOfWeek($dagnr))
             $this->fillDagDeel($nm->school,$dateRange[$formattedDate]['NM'][$leerkracht->id]);
-
+            Log::debug($dateRange[$formattedDate]['NM'][$leerkracht->id]);
+        }
+        */
         $datumIterator->addDays(1);
       }
 
     }
 
-
+    //return compact('dateRange');
       //Log::debug("TEMPARRAY=");
       //Log::debug($tempArray['VM']);
       //increment the $startdate by 1 in each iteration (addDays is a mutator)

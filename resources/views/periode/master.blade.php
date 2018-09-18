@@ -1,5 +1,9 @@
 @extends('layouts.master')
 
+@section('stylesheets')
+  <link rel="stylesheet" href="{{asset('css/weekschema.css')}}">
+@endsection
+
 @section('content')
 <div class="container">
   <div class="row">

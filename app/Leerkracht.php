@@ -19,7 +19,7 @@ class Leerkracht extends Model
       return $this->hasMany(Aanstelling::class);
     }
 
-    public function aanstelling(){
+    public function scopeAanstelling($query){
       return $this->aanstellingen()->first();
     }
 

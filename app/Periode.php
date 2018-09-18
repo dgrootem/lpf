@@ -50,6 +50,11 @@ class Periode extends Model
        return $this->belongsTo(Ambt::class);
    }
 
+   public function weekschemas()
+   {
+     return $this->hasMany(PeriodeWeekSchema::class);
+   }
+
 
    public function scopePeriodesInRange($query,$begin,$einde){
      return $query->where('stop','>=',$begin)->where('start','<=',$einde)->whereHas('school',function($query){

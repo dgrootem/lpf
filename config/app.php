@@ -217,6 +217,7 @@ return [
         //'Input' => Illuminate\Support\Facades\Input::class,
 
         'PCont' => App\Http\Controllers\PeriodeController::class,
+        'LeerkrachtController' => App\Http\Controllers\LeerkrachtController::class,
 
     ],
 
