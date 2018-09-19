@@ -179,9 +179,7 @@ class OverzichtController extends Controller
           $datumIterator->addDays(1);
           continue;
         }
-        //zet woensdagnamiddag op unavailable
-        if ($dagnr==3)
-          $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+
 
         //bepaal het weekschema - we halen dit enkel op wanneer we van week veranderen
         $weekTeller = $datumIterator->weekOfYear - $firstweek; //TODO: fixen voor na januari
@@ -200,6 +198,10 @@ class OverzichtController extends Controller
         }
         $dateRange[$formattedDate]['VM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['VM'][$leerkracht->id]);
         $dateRange[$formattedDate]['NM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['NM'][$leerkracht->id]);
+
+        //forceer woensdagnamiddag op unavailable
+        if ($dagnr==3)
+          $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
         /*
         foreach($voormiddagen as $vm)
         {
