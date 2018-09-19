@@ -36,20 +36,20 @@ class PeriodeController extends Controller
 
 
     private function addDagDeel($schemaDagdeel){
-      $periodeDagDeel = array();
+      $periodeDagDeel = new PeriodeDagDeel;
       Log::debug($schemaDagdeel);
       Log::debug(Auth::user()->schools);
       if (in_array($schemaDagdeel->school_id,Auth::user()->schools->pluck('id')->toArray()))
       {
-        $periodeDagDeel["status"] = DagDeel::AVAILABLE;
+        $periodeDagDeel->status = DagDeel::AVAILABLE;
         Log::debug("AVAILABLE");
       }
       else{
-        $periodeDagDeel["status"] = DagDeel::UNAVAILABLE;
+        $periodeDagDeel->status = DagDeel::UNAVAILABLE;
         Log::debug("UNAVAILABLE");
       }
       //koppel PeriodeDagDeel aan SchemaDagDeel
-      $periodeDagDeel["dagdeel"] = $schemaDagdeel;
+      $periodeDagDeel->dagdeel = $schemaDagdeel;
       //$periodeDagDeel["volgorde"] = $schemaDagdeel->dag->volgorde;
       //$periodeWeekSchema->dagdelen->add($periodeDagDeel);
       return $periodeDagDeel;
@@ -69,6 +69,8 @@ class PeriodeController extends Controller
         //$leerkracht->load('aanstelling.weekschemas.dagdelen');
         $datum = request("datum");
         if (is_null($datum)) $datum = Carbon::today()->setTime(0,0,0);
+
+        //create a new empty model to pass to the view (DONT SAVE)
         $periode = new Periode;
         $periode->school_id = 1;
         $periode->leerkracht_id = $leerkracht->id;
@@ -77,6 +79,7 @@ class PeriodeController extends Controller
         $periode->stop = $datum;
         $periode->ambt = $leerkracht->ambt;
 
+        //we put RELATIONS in arrays, so we dont need key values
         $weekschemas = array();
 
         //DB::beginTransaction();
@@ -88,32 +91,35 @@ class PeriodeController extends Controller
           //$periode->weekschemas = new \Illuminate\Database\Eloquent\Collection;
           foreach($leerkracht->aanstellingen->first()->weekschemas as $ws)
           {
-            $pws = array("volgorde" => $ws->volgorde);
+            $pws = new PeriodeWeekSchema;
+            $pws->volgorde = $ws->volgorde;
             $dagdelen = array();
             foreach ($ws->dagdelen as $sdagdeel) {
               $dagdelen[] = $this->addDagDeel($sdagdeel);
-              //return $dagdelen;
-            }
 
-            $periodeDagDeel = array();
+            }
+            //return $dagdelen;
+
+            $periodeDagDeel = new PeriodeDagDeel;
             $woensdagnm = new SchemaDagDeel;
             $woensdagnm->dag = DOTW::where('naam','wo')->first();
             //return $woensdagnm->dag;
             $woensdagnm->deel = 'NM';
             $woensdagnm->school_id = 1;
 
-            $periodeDagDeel["status"] = DagDeel::UNAVAILABLE;
-            $periodeDagDeel["dagdeel"] = $woensdagnm;
-            $periodeDagDeel["volgorde"] = $woensdagnm->dag->volgorde;
+            $periodeDagDeel->status = DagDeel::UNAVAILABLE;
+            $periodeDagDeel->dagdeel = $woensdagnm;
+            $periodeDagDeel->volgorde = $woensdagnm->dag->volgorde;
             //return $woensdagnm;
 
             $dagdelen[]  =$this->addDagDeel($woensdagnm);
 
-            $pws["dagdelen"] = $dagdelen;
+            $pws->dagdelen = $dagdelen;
             $weekschemas[] = $pws;
             //Log::debug($pws);
           }
-
+          //return $weekschemas;
+          $periode->weekschemas = $weekschemas;
 
           $scholenlijst = School::alle()->pluck('naam','id');
 
@@ -131,7 +137,7 @@ class PeriodeController extends Controller
         //return $periode;
         $dagen = DOTW::orderBy('volgorde')->get();
         $user = Auth::user()->load('schools');
-        //return $weekschemas;
+        ;
         //return PeriodeController::namiddagen($periode->weekschemas->first());
 
         return view('periode.create',compact('periode','ambts','scholen','scholenlijst','dagen'));
@@ -139,10 +145,13 @@ class PeriodeController extends Controller
 
 
     public static function voormiddagen($weekschema){
+      Log::debug($weekschema);
       $result = array();
-      foreach($weekschema->dagdelen as $dagdeel)
+      foreach($weekschema->dagdelen as $dagdeel){
+        Log::debug($dagdeel);
         if ($dagdeel->dagdeel->deel === "VM")
           $result[] = $dagdeel;
+      }
       return $result;
           /*
       return array_filter($weekschema->dagdelen->load('dagdeel')->toArray(), function ($var){
@@ -249,6 +258,7 @@ class PeriodeController extends Controller
       $periode->heleDag = $this->fromRequest('heleDag');
       $periode->ambt = $this->fromRequest('ambt');
 
+/*
       $periode->MA_VM = $this->fromRequestCB('MA_VM');
       $periode->DI_VM = $this->fromRequestCB('DI_VM');
       $periode->WO_VM = $this->fromRequestCB('WO_VM');
@@ -258,7 +268,7 @@ class PeriodeController extends Controller
       $periode->DI_NM = $this->fromRequestCB('DI_NM');
       $periode->DO_NM = $this->fromRequestCB('DO_NM');
       $periode->VR_NM = $this->fromRequestCB('VR_NM');
-
+*/
 
       $uren = $this->calculateUren()['uren'];
 
