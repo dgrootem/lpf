@@ -113,9 +113,9 @@ class OverzichtController extends Controller
     $firstweek = Carbon::parse("first monday of september")->weekOfYear;
 
     if (isset($startDate))
-      $startOfRange = Carbon::parse($startDate);
+      $startOfRange = Carbon::parse($startDate)->startOfWeek();
     else {
-      $startOfRange = Carbon::today();
+      $startOfRange = Carbon::today()->startOfWeek();
     }
     Log::debug($startOfRange);
 
@@ -302,7 +302,7 @@ class OverzichtController extends Controller
         Log::debug($weekschema);
 
         if (!(($i==0) && (strcmp($psd,'NM')==0)))
-          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema[$dagDeel->naam]==1))
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema->dagdelen[$dagDeel->naam]==1))
           {
             //Log::debug('VM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;
@@ -315,7 +315,7 @@ class OverzichtController extends Controller
           }
         $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
         if (!(($i==$days-1) && (strcmp($ped,'VM')==0)))
-          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema[$dagDeel->naam]==1))
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema->dagdelen[$dagDeel->status]==1))
           {
             //Log::debug('NM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;

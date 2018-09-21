@@ -281,7 +281,7 @@ class PeriodeController extends Controller
           Log::debug($weekschema);
           Log::debug("looking for deel ".$_p." bij dag ".$_d);
           $dagdeel = $weekschema->dagdelen->where('dagdeel.deel',$_p)->where('dagdeel.dag.naam',$_d)->first();
-          $dagdeel->status = 1;
+          $dagdeel->status = DagDeel::BOOKED;
           $dagdeel->save();
         }
       }

@@ -38,3 +38,7 @@ a.fullcell {
 .btn.active span.glyphicon {
 	opacity: 1;
 }
+
+.vandaag {
+  background-color: #84e0ff;
+}

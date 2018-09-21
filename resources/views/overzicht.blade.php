@@ -25,7 +25,7 @@
     @foreach ($dateRange as $datum => $lijn)
     <tbody>
       <tr height="50%" @if (\Carbon\Carbon::parse($datum)->isWeekend())  class="collapsedrow" @endif>
-        <th rowspan="2" scope="rowgroup">{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
+        <th rowspan="2" scope="rowgroup" @if(\Carbon\Carbon::parse($datum) == \Carbon\Carbon::today()) class="vandaag" @endif>{{ \Carbon\Carbon::parse($datum)->formatLocalized("%d-%m") }}</th>
         @foreach ($lijn['VM'] as $leerkrachtid => $dagDeel)
           @include('overzicht.dagdeel')
         @endforeach
