@@ -24,7 +24,7 @@
                 @foreach(PCont::voormiddagen($weekschema) as $periodedagdeel)
                 <div class="p-2 bd-highlight flex-fill">
                   <label class="btn mycontainer">
-                    <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->naam)}}_VM"
+                    <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->dag->naam)}}_VM"
                     @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) disabled @endif
                     @if ($periodedagdeel->status===\App\DagDeel::BOOKED) checked @endif
                     class="form-control voormiddag dagdeel" >
@@ -35,9 +35,9 @@
               </div>
               <div class="dlk-radio btn-group d-flex flex-row bd-highlight mb-0">
                 @foreach(PCont::namiddagen($weekschema) as $periodedagdeel)
-                <div class="p-2 bd-highlight flex-fill @if($periodedagdeel->dagdeel->naam === 'wo') invisible @endif">
+                <div class="p-2 bd-highlight flex-fill @if($periodedagdeel->dagdeel->dag->naam === 'wo') invisible @endif">
                   <label class="btn mycontainer">
-                    <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->naam)}}_NM"
+                    <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->dag->naam)}}_NM"
                     @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) disabled @endif
                     @if ($periodedagdeel->status===\App\DagDeel::BOOKED) checked @endif
                     class="form-control voormiddag dagdeel" >
@@ -46,7 +46,7 @@
                 </div>
                 @endforeach
               </div>
-              
+
               {{-- <div class="d-flex flex-row bd-highlight mb-0">
                 <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="MA_VM" @if($periode->MA_VM==1) checked @endif @if(PCont::canBeChosen($periode,'MA_VM')) disabled @endif></div>
                 <div class="p-2 bd-highlight flex-fill"><input type="checkbox" value="1" name="DI_VM" @if($periode->DI_VM==1) checked @endif @if(PCont::canBeChosen($periode,'DI_VM')) disabled @endif></div>

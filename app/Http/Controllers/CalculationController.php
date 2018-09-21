@@ -28,7 +28,7 @@ class CalculationController extends Controller
           $uren = Periode::whereIn('leerkracht_id',$leerkrachtIds)
                     ->where('status_id',$status->id)
                     ->where('deleted',0)
-                    ->sum('berekendeUren');
+                    ->sum('aantalDagdelen');
           Log::debug('uren='.$uren);
           $scholen[$school->id][$status->omschrijving] = $uren;
         }

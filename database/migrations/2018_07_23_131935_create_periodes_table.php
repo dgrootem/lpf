@@ -34,8 +34,8 @@ class CreatePeriodesTable extends Migration
             //$table->unsignedInteger('user_id'); //creator van de periode
             // user die periode gemaakt heeft hangt vast aan school
 
-            $table->integer('berekendeUren');
-
+            $table->integer('aantalDagdelen')->default(0);
+/*
             $table->smallInteger('MA_VM')->nullable();
             $table->smallInteger('MA_NM')->nullable();
             $table->smallInteger('DI_VM')->nullable();
@@ -45,12 +45,12 @@ class CreatePeriodesTable extends Migration
             $table->smallInteger('DO_NM')->nullable();
             $table->smallInteger('VR_VM')->nullable();
             $table->smallInteger('VR_NM')->nullable();
-
+*/
             $table->timestamps();
 
             $table->foreign('school_id')->references('id')->on('schools');
             $table->foreign('status_id')->references('id')->on('statuses');
-            $table->foreign('leerkracht_id')->references('id')->on('leerkrachts');
+            $table->foreign('leerkracht_id')->references('id')->on('leerkrachts')->onDelete('cascade');
         });
     }
 

@@ -3,7 +3,7 @@
 namespace App;
 use Illuminate\Database\Eloquent\Model;
 
-class DagDeel  extends Model
+class DagDeel  //extends Model
 {
 
     public const UNAVAILABLE = 1;
@@ -12,6 +12,7 @@ class DagDeel  extends Model
 
     public $periode; //Periode indien er op deze moment iemand ingeboekt is
     public $status; // "available", "unavailable", "booked";
+    public $naam;
     //de school waar ofwel
     // a) deze persoon normaal werkt op deze dag (wanneer niet ingeboekt)
     // b) deze persoon ingeboekt is
@@ -19,5 +20,5 @@ class DagDeel  extends Model
 
     public $visualisatie = 'bg-light';
 
-    public $naam;
+
 }

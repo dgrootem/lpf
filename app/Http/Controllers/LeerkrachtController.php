@@ -163,7 +163,7 @@ class LeerkrachtController extends Controller
       foreach(['VM','NM'] as $deel){
         Log::debug("Creating ".$deel);
         foreach ($dagen as $key => $dag) {
-          if (($dag->naam === 'wo') && ($deel === 'NM')) continue;
+          //if (($dag->naam === 'wo') && ($deel === 'NM')) continue;
           Log::debug("Create ".$dag.'_'.$deel);
           $d = new SchemaDagDeel;
           $d->school_id = 1;

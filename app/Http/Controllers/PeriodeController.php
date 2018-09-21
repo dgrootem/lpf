@@ -100,6 +100,7 @@ class PeriodeController extends Controller
             }
             //return $dagdelen;
 
+            /*
             $periodeDagDeel = new PeriodeDagDeel;
             $woensdagnm = new SchemaDagDeel;
             $woensdagnm->dag = DOTW::where('naam','wo')->first();
@@ -113,7 +114,7 @@ class PeriodeController extends Controller
             //return $woensdagnm;
 
             $dagdelen[]  =$this->addDagDeel($woensdagnm);
-
+            */
             $pws->dagdelen = $dagdelen;
             $weekschemas[] = $pws;
             //Log::debug($pws);
@@ -148,7 +149,7 @@ class PeriodeController extends Controller
       Log::debug($weekschema);
       $result = array();
       foreach($weekschema->dagdelen as $dagdeel){
-        Log::debug($dagdeel);
+        Log::debug("[".$dagdeel->dagdeel->dag->naam . "_".$dagdeel->dagdeel->deel."]");
         if ($dagdeel->dagdeel->deel === "VM")
           $result[] = $dagdeel;
       }
@@ -160,10 +161,13 @@ class PeriodeController extends Controller
     }
 
     public static function namiddagen($weekschema){
+      Log::debug($weekschema);
       $result = array();
-      foreach($weekschema->dagdelen as $dagdeel)
+      foreach($weekschema->dagdelen as $dagdeel){
+        Log::debug("[".$dagdeel->dagdeel->dag->naam . "_".$dagdeel->dagdeel->deel."]");
         if ($dagdeel->dagdeel->deel === "NM")
           $result[] = $dagdeel;
+      }
       return $result;
 
     }
@@ -177,6 +181,7 @@ class PeriodeController extends Controller
     public function store(Request $request)
     {
         $periode = new Periode;
+        //return($request->all());
         $this->fillPeriode($request,$periode);
 
         //$this->checkAndFix($periode);
@@ -243,9 +248,10 @@ class PeriodeController extends Controller
       return $value;
     }
 
-    private function fillPeriode(Request $request,Periode $periode){
+    public function fillPeriode(Request $request,Periode $periode){
 
-
+      //DB::beginTransaction();
+      try{
       $periode->start = Carbon::parse($this->fromRequest('start'));
       $periode->startDagDeel = $this->fromRequest('startDagDeel');
       $periode->stop = Carbon::parse($this->fromRequest('stop'));
@@ -258,23 +264,56 @@ class PeriodeController extends Controller
       $periode->heleDag = $this->fromRequest('heleDag');
       $periode->ambt = $this->fromRequest('ambt');
 
-/*
-      $periode->MA_VM = $this->fromRequestCB('MA_VM');
-      $periode->DI_VM = $this->fromRequestCB('DI_VM');
-      $periode->WO_VM = $this->fromRequestCB('WO_VM');
-      $periode->DO_VM = $this->fromRequestCB('DO_VM');
-      $periode->VR_VM = $this->fromRequestCB('VR_VM');
-      $periode->MA_NM = $this->fromRequestCB('MA_NM');
-      $periode->DI_NM = $this->fromRequestCB('DI_NM');
-      $periode->DO_NM = $this->fromRequestCB('DO_NM');
-      $periode->VR_NM = $this->fromRequestCB('VR_NM');
-*/
+      $periode->save();
 
-      $uren = $this->calculateUren()['uren'];
+      $data = request()->all();
 
-      Log::debug('Uren=');
-      Log::debug($uren);
-      $periode->berekendeUren = $uren;
+
+      foreach($data as $key => $value){
+        if (strpos($key,"Week")===0){ //we hebben een checkbox voor een TOEWIJZING
+          $_w = intval(substr($key,4,1)); //Weeknummer
+          $_d = strtolower(substr($key,6,2)); //Dag
+          $_p = substr($key,9,2); //dagdeel (dayPart)
+          $weekschema = $periode->weekschemas()->where('volgorde',$_w)->first();
+          if (!isset($weekschema)){
+            $weekschema = $this->newWeekSchema($periode,$periode->leerkracht->aanstelling()->weekschemas[$_w-1]);
+          }
+          Log::debug($weekschema);
+          Log::debug("looking for deel ".$_p." bij dag ".$_d);
+          $dagdeel = $weekschema->dagdelen->where('dagdeel.deel',$_p)->where('dagdeel.dag.naam',$_d)->first();
+          $dagdeel->status = 1;
+          $dagdeel->save();
+        }
+      }
+
+      $aantalDagdelen = $this->calculateAantalDagdelen($periode)['aantalDagdelen'];
+
+      Log::debug('aantalDagdelen=');
+      Log::debug($aantalDagdelen);
+      $periode->aantalDagdelen = $aantalDagdelen;
+      $periode->save();
+    }catch(\Exception $e){
+      //DB::rollback();
+      throw $e;
+    }
+    DB::commit();
+    }
+
+
+    public function newWeekSchema($periode,$aanstellingsWeekschema){
+      $pws = new PeriodeWeekSchema;
+      $aantal = $periode->weekschemas()->count();
+      $pws->volgorde=$aantal+1;
+      $periode->weekschemas()->save($pws);
+      foreach($aanstellingsWeekschema->dagdelen as $dagdeel){
+        //Log::debug($dagdeel->dag->naam."_".$dagdeel->deel."->".$dagdeel->status);
+        $pdd = new PeriodeDagDeel;
+        $pdd->dagdeel_id = $dagdeel->id;
+        $pdd->status = -1;
+        $pws->dagdelen()->save($pdd);
+      }
+      $pws->load('dagdelen.dagdeel.dag');
+      return $pws;
     }
 
     /**
@@ -421,8 +460,62 @@ class PeriodeController extends Controller
     //    iemand die vervanging doet op maandag -> woensdag? is dat 3 dagen aan 24/24 ?
     //    iemand die vervanging doet op woensdag alleen? zou 1 dag aan 12/24 zijn...
     //    iemand die vervanging doet van donderdag tot dinsdag? 4 dagen aan 24/24 ?
-    function calculateUren()
+    function calculateAantalDagdelen($periode)
     {
+      $aantalWeken = $periode->stop->weekOfYear - $periode->start->weekOfYear +1;
+      Log::debug("aantal volledige weken=".$aantalWeken);
+
+      // voor de eerste week:
+      //   bepaal weekschema $ws
+      //   en overloop de dagen van de week vanaf de startdatum
+      // als aantalweken >= 2
+      //   voor elke week
+      //    bepaal weekschema $ws
+      //    als NIET laatste week
+      //      aantalDagdelen += $ws -> aantal van dagdelen met status == BOOKED
+      //    anders
+      //      en overloop de dagen van de week tot aan de stopdatum
+      $aantalWeekSchemas = $periode->weekschemas->count();
+      $a_start = Carbon::parse($periode->leerkracht->aanstelling()->start);
+      $a_stop = Carbon::parse($periode->leerkracht->aanstelling()->stop);
+
+      $startWeekVanAanstelling = $a_start->weekOfYear;
+
+      $p_start = Carbon::parse($periode->start);
+      $p_stop = Carbon::parse($periode->stop);
+
+      $datumIterator = clone $p_start;
+      $aantalDagdelen = 0;
+      for($i=1;$i<=$aantalWeken;$i++){
+        $currentWeekVolgorde = ($datumIterator->weekOfYear - $startWeekVanAanstelling) % $aantalWeekSchemas;
+        $pws = $periode->weekschemas[$currentWeekVolgorde];
+        $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->where('status',1);
+
+        if ($i==1){ //eerste week speciaal behandelen
+          $startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_start->dayOfWeek))->pluck('volgorde');
+          foreach($current_dagdelen as $currentDagDeel)
+          {
+            if ($currentDagDeel->dagdeel->dag->volgorde >= $startDagVolgorde)
+              $aantalDagdelen++;
+          }
+        }
+        else if ($i==$aantalWeken){ //laatste week speciaal behandelen
+          $stopDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_stop->dayOfWeek))->pluck('volgorde');
+          foreach($current_dagdelen as $currentDagDeel)
+          {
+            if ($currentDagDeel->dagdeel->dag->volgorde <= $stopDagVolgorde)
+              $aantalDagdelen++;
+          }
+
+          }
+        else{ //normal case
+          $dagdelen += $current_dagdelen->count();
+        }
+        $datumIterator->addDays(7); //spring steeds een week verder
+      }
+      return compact('result','aantalDagdelen');
+
+      /*
       Log::debug(request()->all());
       $datestart = Carbon::parse($this->fromRequest('start'));
       $datestop = Carbon::parse($this->fromRequest('stop'));

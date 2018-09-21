@@ -19,7 +19,7 @@ class CreatePeriodeWeekSchemasTable extends Migration
             $table->integer('volgorde');
             $table->timestamps();
 
-            $table->foreign('periode_id')->references('id')->on('periodes');
+            $table->foreign('periode_id')->references('id')->on('periodes')->onDelete('cascade');
         });
     }
 

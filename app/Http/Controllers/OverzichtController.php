@@ -33,7 +33,7 @@ class OverzichtController extends Controller
     if ($a->gt($b)) {return $a;} else {return $b;}
   }
 
-  private function shortDayOfWeek($dagIndex)
+  public static function shortDayOfWeek($dagIndex)
   {
     switch($dagIndex){
       case 0: return "zo";
@@ -47,18 +47,21 @@ class OverzichtController extends Controller
     }
   }
 
-  private function fillDagDeel($school,$dagdeel)
+  public function fillDagDeel($school,$dagdeel,$dagnaam)
   {
     $dagdeel->school = $school;
+    $dagdeel->naam = $dagnaam;
     if ((is_null($school)) || ($school->id==1))
       $dagdeel->status = DagDeel::UNAVAILABLE;
     else {
       $dagdeel->status = DagDeel::AVAILABLE;
     }
-    Log::debug("Filled dagdeel");
-    Log::debug("School=".$dagdeel->school);
-    Log::debug("Status=".$dagdeel->status);
-    return $dagdeel;
+    Log::debug("Filled dagdeel (".$dagdeel->naam.")= [School=".$dagdeel->school->afkorting.",Status=".$dagdeel->status."]");
+
+    //Log::debug(compact('dagdeel'));
+    //return $dagdeel;
+
+    //return $dagdeel;
   }
 /*
   private function datumStatus($datum,$leerkracht,$firstweek){
@@ -145,7 +148,7 @@ class OverzichtController extends Controller
       $aantalAanstellingen = $leerkracht->aanstellingen->count();
       if ($aantalAanstellingen!=0){
         $aantalWeekSchemas = $leerkracht->aanstellingen->first()->weekschemas->count();
-        Log::debug("aantal aanstellingen=".$aantalAanstellingen) ;
+        Log::debug($leerkracht->naam . " -> aantal aanstellingen=".$aantalAanstellingen) ;
         Log::debug("aantal weekschemas=".$aantalWeekSchemas);
       }
       else {
@@ -163,7 +166,7 @@ class OverzichtController extends Controller
         Log::debug($formattedDate);
         //trivial case
         if ($aantalAanstellingen == 0){
-          Log::debug("Geen aanstelling..skip");
+          Log::debug("Geen aanstelling voor ".$leerkracht->naam."..skip");
           $dateRange[$formattedDate]['VM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
           $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
           $datumIterator->addDays(1);
@@ -196,12 +199,28 @@ class OverzichtController extends Controller
           $namiddagen = LeerkrachtController::namiddagen($weekschema);//->namiddagenFull()->get();
 
         }
-        $dateRange[$formattedDate]['VM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['VM'][$leerkracht->id]);
-        $dateRange[$formattedDate]['NM'][$leerkracht->id] = $this->fillDagDeel($voormiddagen[$this->shortDayOfWeek($dagnr)]->school,$dateRange[$formattedDate]['NM'][$leerkracht->id]);
+        $dagnaam = $this->shortDayOfWeek($dagnr);
 
+        //vul de voormiddag
+        $this->fillDagDeel($voormiddagen[$dagnaam]->school,$dateRange[$formattedDate]['VM'][$leerkracht->id],$dagnaam);
+        //$debugdagdeel = $dateRange[$formattedDate]['VM'][$leerkracht->id];
+        //Log::debug("dateRange[".$formattedDate."]['VM'][".$leerkracht->naam."]");
+        //Log::debug(compact('debugdagdeel'));
+
+        //vul de namiddag
+        $school = School::find(1);
+        if ($dagnr!=3)
+          $school = $namiddagen[$dagnaam]->school;
+        //$dateRange[$formattedDate]['NM'][$leerkracht->id] =
+        $this->fillDagDeel($school,$dateRange[$formattedDate]['NM'][$leerkracht->id],$dagnaam);
         //forceer woensdagnamiddag op unavailable
         if ($dagnr==3)
           $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
+
+        // $debugdagdeel = $dateRange[$formattedDate]['NM'][$leerkracht->id];
+        // Log::debug("dateRange[".$formattedDate."]['VM'][".$leerkracht->naam."]");
+        // Log::debug(compact('debugdagdeel'));
+
         /*
         foreach($voormiddagen as $vm)
         {
@@ -223,6 +242,7 @@ class OverzichtController extends Controller
       }
 
     }
+    //return $dateRange;
 
     //return compact('dateRange');
       //Log::debug("TEMPARRAY=");
@@ -262,9 +282,27 @@ class OverzichtController extends Controller
         //Log::debug("DAG: ".$i);
         //Log::debug($datumIterator);
         //Log::debug("Leerkracht=".$periode->leerkracht->id);
+
+        //selecteer het juiste weekschema
+        $weekschema=null;
+        $currentWeekTeller = -1;
+        $aantalWeekSchemas = $periode->weekschemas->count();
+        Log::debug($periode->weekschemas);
+        $weekTeller = $datumIterator->weekOfYear - $firstweek; //TODO: fixen voor na januari
+        if ((($currentWeekTeller != $weekTeller) && ($aantalWeekSchemas>1))|| (!isset($weekschema)))
+        {
+          $currentWeekTeller = $weekTeller;
+          $huidigeWeek = $weekTeller % $aantalWeekSchemas +1; //we tellen Week1 , Week2, ... terwijl mod functie begint bij 0
+          $weekschema = $periode->weekschemas->where('volgorde',$huidigeWeek)->first();
+        }
+
+
         $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
+        //Log::debug(compact('dagDeel'));
+        Log::debug($weekschema);
+
         if (!(($i==0) && (strcmp($psd,'NM')==0)))
-          if (($dagDeel->status==DagDeel::AVAILABLE) && ($periodeArray[strtoupper($dagDeel->naam)]==1))
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema[$dagDeel->naam]==1))
           {
             //Log::debug('VM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;
@@ -277,7 +315,7 @@ class OverzichtController extends Controller
           }
         $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
         if (!(($i==$days-1) && (strcmp($ped,'VM')==0)))
-          if (($dagDeel->status==DagDeel::AVAILABLE) && ($periodeArray[strtoupper($dagDeel->naam)]==1))
+          if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema[$dagDeel->naam]==1))
           {
             //Log::debug('NM'.DagDeel::BOOKED);
             $dagDeel->status=DagDeel::BOOKED;

@@ -51,6 +51,10 @@
   background-color: #eee;
 }
 
+/* add red background for disabled checkboxes */
+.mycontainer input:disabled ~ .mycheckmark{
+  background-color: #820e25;
+}
 /* On mouse-over, add a grey background color */
 .mycontainer:hover input ~ .mycheckmark {
   background-color: #ccc;

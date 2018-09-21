@@ -20,7 +20,7 @@ class CreatePeriodeDagDeelsTable extends Migration
             $table->integer('status'); //UNAVAILABLE, AVAILABLE, BOOKED
             $table->timestamps();
 
-            $table->foreign('periode_week_schema_id')->references('id')->on('periode_week_schemas');
+            $table->foreign('periode_week_schema_id')->references('id')->on('periode_week_schemas')->onDelete('cascade');
             $table->foreign('dagdeel_id')->references('id')->on('schemadagdeel');
 
         });
