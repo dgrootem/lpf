@@ -271,48 +271,49 @@ class OverzichtController extends Controller
         $voormiddagen=PeriodeController::voormiddagen($pws);
         $namiddagen=PeriodeController::namiddagen($pws);
 
-        if ($i==1){ //eerste week speciaal behandelen
-          $startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($ps->dayOfWeek))->pluck('volgorde')->first();
+        //if (($i==1) && ($datumIterator->weekOfYear == $ps->weekOfYear)) { //eerste week speciaal behandelen
+        Log::debug("Eerste week");
+        //$startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($ps->dayOfWeek))->pluck('volgorde')->first();
+        for($j=1;$j<=7;$j++)
+        {
+          //skip ZA & ZO + skip dagen die voor de startdag vallen
+          if (($j<=5) && /*($j>=$startDagVolgorde) && */($datumIterator>=$ps) && ($datumIterator<=$pe))
+          {
+            $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
+            if (!(($datumIterator == $ps) && (strcmp($psd,'NM')==0)))
+            {
+              $this->processDagDeel($voormiddagen[$j-1],$dagDeel,'VM',$periode);
+            }
+            $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
+            if (!(($datumIterator == $pe) && (strcmp($ped,'VM')==0)))
+              $this->processDagDeel($namiddagen[$j-1],$dagDeel,'NM',$periode);
+          }
+          $datumIterator->addDays(1);
+        }
+      }
+        /*
+        if (($i==$aantalWeken) && ($datumIterator->weekOfYear == $pe->weekOfYear)) { //laatste week speciaal behandelen
+          Log::debug("Laatste week");
+          //$startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($ps->dayOfWeek))->pluck('volgorde')->first();
           for($j=1;$j<=7;$j++)
           {
-            if (($j<=5) && ($j>=$startDagVolgorde)){
+            //skip ZA & ZO + skip dagen die voor de startdag vallen
+            if (($j<=5) &&
+              //($j>=$startDagVolgorde) &&
+              ($datumIterator<=$pe)) {
               $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
               if (!(($datumIterator == $ps) && (strcmp($psd,'NM')==0)))
               {
-                Log::debug("trying VM....");
-                Log::debug('$dagDeel->status='.$dagDeel->status);
-                Log::debug('$voormiddagen['.($j-1)."]->status=".$voormiddagen[$j-1]->status);
-
-              //if (!(($i==0) && (strcmp($psd,'NM')==0)))
-                if (($dagDeel->status==DagDeel::AVAILABLE) && ($voormiddagen[$j-1]->status==DagDeel::BOOKED))
-                {
-                  Log::debug('VM=BOOKED');
-                  $dagDeel->status=DagDeel::BOOKED;
-                  $dagDeel->school=$periode->school;
-                  $dagDeel->visualisatie=$periode->status->visualisatie;
-                  $dagDeel->periode=$periode;
-                }
-                else {
-                  Log::debug("VM=NOT booked");
-                }
+                $this->processDagDeel($voormiddagen[$j-1],$dagDeel,'VM',$periode);
               }
               $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
               if (!(($datumIterator == $pe) && (strcmp($ped,'VM')==0)))
-              //if (!(($i==$days-1) && (strcmp($ped,'VM')==0)))
-                if (($dagDeel->status==DagDeel::AVAILABLE) && ($namiddagen[$j-1]->status==DagDeel::BOOKED))
-                //if (($dagDeel->status==DagDeel::AVAILABLE) && ($weekschema->dagdelen[$dagDeel->status]==1))
-                {
-                  Log::debug('NM'.DagDeel::BOOKED);
-                  $dagDeel->status=DagDeel::BOOKED;
-                  $dagDeel->school=$periode->school;
-                  $dagDeel->visualisatie=$periode->status->visualisatie;
-                  $dagDeel->periode=$periode;
-                }
+                $this->processDagDeel($namiddagen[$j-1],$dagDeel,'NM',$periode);
             }
             $datumIterator->addDays(1);
           }
         }
-      }
+      }*/
 
 /*
       for ($i=0; $i < $days/7; $i++) {
@@ -394,6 +395,21 @@ class OverzichtController extends Controller
     //return compact(['dateRange','periodesInRange','leerkrachten','scholen']);
 
     return view('overzicht',compact(['dateRange','periodesInRange','leerkrachten','scholen','startOfRange']));
+  }
+
+  private function processDagDeel($periodeDagDeel,$visualisatieDagdeel,$part,$periode){
+    Log::debug("trying $part....");
+    if (($visualisatieDagdeel->status==DagDeel::AVAILABLE) && ($periodeDagDeel->status==DagDeel::BOOKED))
+    {
+      Log::debug($part.'=BOOKED');
+      $visualisatieDagdeel->status=DagDeel::BOOKED;
+      $visualisatieDagdeel->school=$periode->school;
+      $visualisatieDagdeel->visualisatie=$periode->status->visualisatie;
+      $visualisatieDagdeel->periode=$periode;
+    }
+    else {
+      Log::debug($part."=NOT booked");
+    }
   }
 
   public function defaultRange(){

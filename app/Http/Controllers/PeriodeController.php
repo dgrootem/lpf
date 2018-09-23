@@ -479,7 +479,7 @@ class PeriodeController extends Controller
       $a_start = Carbon::parse($periode->leerkracht->aanstelling()->start);
       $a_stop = Carbon::parse($periode->leerkracht->aanstelling()->stop);
 
-        $startWeekVanAanstelling = $a_start->weekOfYear;
+      $startWeekVanAanstelling = $a_start->weekOfYear;
 
       $p_start = Carbon::parse($periode->start);
       $p_stop = Carbon::parse($periode->stop);
