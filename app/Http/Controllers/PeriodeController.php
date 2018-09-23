@@ -181,7 +181,7 @@ class PeriodeController extends Controller
     public function store(Request $request)
     {
         $periode = new Periode;
-        //return($request->all());
+        // return($request->all());
         $this->fillPeriode($request,$periode);
 
         //$this->checkAndFix($periode);
@@ -228,6 +228,7 @@ class PeriodeController extends Controller
      */
     public function update(Request $request, $id)
     {
+      // return($request->all());
         //return compact('id');
         $periode = Periode::find($id);
         $this->fillPeriode($request,$periode);

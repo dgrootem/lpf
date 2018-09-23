@@ -46,7 +46,7 @@
             <!-- <div class="col"> -->
               <div class="card-body">
                 <p class="card-text">
-                  <textarea class="form-control" id="opmerking" value="opmerking" rows="3">{{$periode->opmerking}}</textarea>
+                  <textarea class="form-control" name="opmerking" id="opmerking" value="opmerking" rows="3">{{$periode->opmerking}}</textarea>
                 </p>
               </div>
             </div>
