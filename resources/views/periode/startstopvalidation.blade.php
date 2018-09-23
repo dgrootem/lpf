@@ -3,7 +3,9 @@
 
   var form  = document.getElementById('periodeform');
   var start = $("#start");
+  var startDagDeel = $("#startDagDeel");
   var stop = $("#stop");
+  var stopDagDeel = $("#stopDagDeel");
   var aantal_uren_van_titularis = $("#aantal_uren_van_titularis");
 
   //var start = document.getElementById('start');
@@ -15,12 +17,14 @@ $(document).ready(function(){
 
   function calculateUren(){
     return $.ajax({
-      url: "{{ url('/periodes/calculateUren') }}",
+      url: "{{ url('/periodes/calculateAantalDagdelen') }}",
       method: 'post',
       data: {
          _token : '{{ csrf_token() }}',
          start: start.val(),
+         startDagDeel: startDagDeel.val(),
          stop: stop.val(),
+         stopDagDeel: stopDagDeel.val(),
          leerkracht_id: {{$periode->leerkracht->id}},
          aantal_uren_van_titularis: aantal_uren_van_titularis.val(),
          school_id : {{$periode->school_id}},

@@ -28,4 +28,4 @@ Route::get('auth/google/callback', 'Auth\LoginController@handleProviderCallback'
 
 //TODO: move to API-routes
 Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
-Route::post('/periodes/calculateUren','PeriodeController@calculateUren');
+Route::post('/periodes/calculateAantalDagdelen','PeriodeController@calculateAantalDagdelen');
