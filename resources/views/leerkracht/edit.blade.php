@@ -23,22 +23,16 @@
           @endforeach
         @endforeach
       </div>
-      </div>
     </div>
-  </div>
 
 
-
-
-
-  </div>
   <div class="form-row">
-    <div class="col">
+    {{-- <div class="col"> --}}
       <a class="btn btn-secondary btn-close" href="{{url(URL::previous())}}">Annuleer</a>
-    </div>
-    <div class="col">
-      <button id="mysubmit" type="submit" class="btn btn-primary btn-block float-md-right">Bewaar</button>
-    </div>
+    {{-- </div>
+    <div class="col"> --}}
+      <button id="mysubmit" type="submit" class="btn btn-primary loat-md-right">Bewaar</button>
+    {{-- </div> --}}
   </div>
   </div>
 </form>

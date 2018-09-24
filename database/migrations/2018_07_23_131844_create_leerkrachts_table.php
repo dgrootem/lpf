@@ -20,7 +20,7 @@ class CreateLeerkrachtsTable extends Migration
 
             //deze velden bevatten de school_id van de school waar deze leerkracht die moment werkt
 
-            $table->string('lestijden_per_week');
+            //$table->string('lestijden_per_week');
 
 
             $table->smallInteger('actief'); // ja / nee
@@ -28,7 +28,7 @@ class CreateLeerkrachtsTable extends Migration
 
             //$table->foreign('vaste_school_id')->references('id')->on('schools');
             $table->foreign('ambt_id')->references('id')->on('ambts');
-            
+
         });
     }
 

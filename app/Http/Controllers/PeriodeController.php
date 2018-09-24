@@ -395,6 +395,16 @@ class PeriodeController extends Controller
         return $days;
     }
 
+    public function getOpdrachtBreuk(){
+      $date = request('startdate');
+      $leerkracht_id = request('leerkracht_id');
+      $school_id = request('school_id');
+
+      $teller = Leerkracht::find($leerkracht_id)->aanstelling()->lestijden_per_week;
+      $noemer = School::find($school_id)->school_type->noemer;
+      return compact('teller','noemer');
+    }
+
 
     public function checkForConflict()
     {

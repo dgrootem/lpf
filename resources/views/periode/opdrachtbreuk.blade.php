@@ -10,7 +10,7 @@
             <label for="ambt">School</label>
           </div>
           <div class="col">
-            {{ Form::select('school_id',$scholenlijst,$periode->school_id, ['class' => 'form-control'])}}
+            {{ Form::select('school_id',$scholenlijst,$periode->school_id, ['class' => 'form-control', 'id' => 'schoolselector'])}}
           </div>
         </div>
       </p>
@@ -28,8 +28,9 @@
               aria-describedby="Opdrachtbreuk van te vervangen leerkrecht"
               placeholder="uren te vervangen" required>
             </div>
+            {{-- <div class="col-1">/</div> --}}
             <div class="col-3">
-            <input type="text" class="form-control" readonly value="/ {{ $periode->school->school_type->noemer }}">
+            <input type="text" class="form-control" id="opdrachtbreuk-noemer" readonly value="/ {{ $periode->school->school_type->noemer }}">
           </div>
         </div>
       </p>

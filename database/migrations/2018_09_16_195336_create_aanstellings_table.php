@@ -16,6 +16,7 @@ class CreateAanstellingsTable extends Migration
         Schema::create('aanstellings', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('leerkracht_id');
+            $table->integer('lestijden_per_week');
             $table->date('start');
             $table->date('stop')->nullable();
             $table->timestamps();

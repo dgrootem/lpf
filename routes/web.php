@@ -32,3 +32,4 @@ Route::post('/periodes/getConflictingDays', 'OverzichtController@rangeForLeerkra
 Route::post('/periodes/calculateAantalDagdelen','PeriodeController@calculateAantalDagdelen');
 Route::post('/periodes/startWeekschemaNr','PeriodeController@getStartWeekschemaNr');
 Route::post('/periodes/getConflictingDays','PeriodeController@getConflictingDays');
+Route::post('/periodes/getOpdrachtBreuk','PeriodeController@getOpdrachtBreuk');

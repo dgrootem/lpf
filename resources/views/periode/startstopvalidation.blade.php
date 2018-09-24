@@ -59,14 +59,15 @@ $(document).ready(function(){
     });
   }
 
-  function snorkel(){
+  function getOpdrachtBreukData(school_id){
 
     return $.ajax({
-      url: "{{ url('/periodes/getConflictingDays') }}",
+      url: "{{ url('/periodes/getOpdrachtBreuk') }}",
       method: 'post',
       data: {
          _token : '{{ csrf_token() }}',
          leerkracht_id: {{$periode->leerkracht->id}},
+         school_id: school_id,
          datestart: start.val(),
       },
       success: function(result){
@@ -163,11 +164,18 @@ $(document).ready(function(){
     });
   }
 
-  // function disableConflictingDays(days){
-  //   conflictdagen.forEach(dag => {
-  //
-  //   });
-  // }
+  $("#schoolselector").on('change',function(){
+    //alert(this.value);
+    setOpdrachtBreuk(this.value);
+  })
+
+
+  function setOpdrachtBreuk(value){
+    getOpdrachtBreukData(value).done(function(data){
+      $("#aantal_uren_van_titularis").val(data.teller);
+      $("#opdrachtbreuk-noemer").val("/"+data.noemer);
+    });
+  }
 
   function addValueCheck(element){
     element.on('change',function(){
@@ -224,6 +232,8 @@ $(document).ready(function(){
   checkConflictingDays({{$periode->id}}).done(function(data){
     setConflictingDays(data);
   });
+
+  setOpdrachtBreuk($("#schoolselector").val());
 
   $(".delete").on("click", function(e){
       return confirm("U gaat deze periode verwjderen. Bent u zeker?");
