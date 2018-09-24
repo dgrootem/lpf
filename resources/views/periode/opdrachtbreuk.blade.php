@@ -10,7 +10,11 @@
             <label for="ambt">School</label>
           </div>
           <div class="col">
-            {{ Form::select('school_id',$scholenlijst,$periode->school_id, ['class' => 'form-control', 'id' => 'schoolselector'])}}
+
+            {{ Form::select('school_id',$scholenlijst,$periode->school_id,
+              ['class' => 'form-control',
+               'id' => 'schoolselector',
+               ])}}
           </div>
         </div>
       </p>

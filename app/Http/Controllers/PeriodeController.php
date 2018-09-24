@@ -86,8 +86,9 @@ class PeriodeController extends Controller
         $periode->school_id = 1;
         $periode->leerkracht_id = $leerkracht->id;
         $periode->start = $datum;
-
+        $periode->startDagDeel = 'VM';
         $periode->stop = $datum;
+        $periode->stopDagDeel = 'NM';
         $periode->ambt = $leerkracht->ambt;
 
         //we put RELATIONS in arrays, so we dont need key values
@@ -108,7 +109,8 @@ class PeriodeController extends Controller
         }
         $periode->weekschemas = $weekschemas;
 
-        $scholenlijst = School::alle()->pluck('naam','id');
+        $scholenlijst = School::alle()->pluck('afkorting','id');
+        //$scholenlijst = School::select(DB::raw("CONCAT(`afkorting`,'--',`naam`) AS display_name"),'id')->get()->pluck('display_name','id');
 
         //TODO: in javascript de juiste ophalen
         $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;

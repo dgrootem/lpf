@@ -19,6 +19,7 @@ class CalculationController extends Controller
       $scholen = array();
       foreach ($scholenraw as $key => $school) {
         $scholen[$school->id]['naam'] = $school->naam;
+        $scholen[$school->id]['afkorting'] = $school->afkorting;
         Log::debug('school='.$school->naam);
         //Log::debug('lestijden_per_week='.$school->lestijden_per_week);
 

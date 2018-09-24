@@ -11,7 +11,7 @@
 
 
           @foreach ($scholen as $key => $school)
-            ["{{$school['naam']}}"],
+            ["[{{$school['afkorting']}}] {{$school['naam']}}"],
           @endforeach
 
         ],
