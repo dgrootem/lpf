@@ -242,6 +242,17 @@ class PeriodeController extends Controller
 
       $data = request()->all();
 
+      //check voor mismatch tussen aantal weekschemas in aanstelling en in periode
+      // (kan enkel bij creatie van nieuwe periode)
+      Log::debug($periode->weekschemas->count());
+      Log::debug($aanstelling->weekschemas->count());
+
+      if ($periode->weekschemas->count() <= $aanstelling->weekschemas->count())
+      foreach($aanstelling->weekschemas as $a_w){
+        $this->newWeekSchema($periode,$a_w);
+      }
+
+
       //TODO: we moeten kijken hoeveel weekschemas er zijn gekoppeld aan de leerkracht
 
       foreach($data as $key => $value){
@@ -251,7 +262,9 @@ class PeriodeController extends Controller
           $_p = substr($key,9,2); //dagdeel (dayPart)
           $weekschema = $periode->weekschemas()->where('volgorde',$_w)->first();
           if (!isset($weekschema)){
-            $weekschema = $this->newWeekSchema($periode,$periode->leerkracht->aanstelling()->weekschemas[$_w-1]);
+            //$weekschema = $this->newWeekSchema($periode,$aanstelling->weekschemas[$_w-1]);
+            Log::error('Weekschema '.$_w.' bestaat niet. Aanstelling heeft maar '.$aanstelling->weekschemas->count().' schemas');
+            continue;
           }
           Log::debug($weekschema);
           Log::debug("looking for deel ".$_p." bij dag ".$_d);
@@ -260,6 +273,9 @@ class PeriodeController extends Controller
           $dagdeel->save();
         }
       }
+
+      //referesh the $periode object to account for all the created stuff before calculation
+      $periode->load('weekschemas.dagdelen');
 
       $aantalDagdelen = $this->calculateAantalDagdelen($periode)['aantalDagdelen'];
 
