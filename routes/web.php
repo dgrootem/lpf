@@ -28,4 +28,7 @@ Route::get('auth/google/callback', 'Auth\LoginController@handleProviderCallback'
 
 //TODO: move to API-routes
 Route::post('/periodes/checkForConflict', 'PeriodeController@checkForConflict');
+Route::post('/periodes/getConflictingDays', 'OverzichtController@rangeForLeerkrachten');
 Route::post('/periodes/calculateAantalDagdelen','PeriodeController@calculateAantalDagdelen');
+Route::post('/periodes/startWeekschemaNr','PeriodeController@getStartWeekschemaNr');
+Route::post('/periodes/getConflictingDays','PeriodeController@getConflictingDays');

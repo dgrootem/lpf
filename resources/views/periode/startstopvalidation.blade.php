@@ -40,6 +40,67 @@ $(document).ready(function(){
     });
   }
 
+  function getStartWeekschemaNr(){
+
+    return $.ajax({
+      url: "{{ url('/periodes/startWeekschemaNr') }}",
+      method: 'post',
+      data: {
+         _token : '{{ csrf_token() }}',
+         leerkracht_id: {{$periode->leerkracht->id}},
+         datestart: start.val(),
+      },
+      success: function(result){
+         console.log(result);
+      },
+      failure: function(result){
+        console.log(result);
+      }
+    });
+  }
+
+  function snorkel(){
+
+    return $.ajax({
+      url: "{{ url('/periodes/getConflictingDays') }}",
+      method: 'post',
+      data: {
+         _token : '{{ csrf_token() }}',
+         leerkracht_id: {{$periode->leerkracht->id}},
+         datestart: start.val(),
+      },
+      success: function(result){
+         console.log(result);
+      },
+      failure: function(result){
+        console.log(result);
+      }
+    });
+  }
+
+  function checkConflictingDays(periode_id){
+
+    return $.ajax({
+      url: "{{ url('/periodes/getConflictingDays') }}",
+      method: 'post',
+      data: {
+         _token : '{{ csrf_token() }}',
+         leerkracht_id: {{$periode->leerkracht->id}},
+         periode_id: 3,
+         datestart: start.val(),
+         datestop: stop.val()
+      },
+      success: function(result){
+        console.log(result.conflictdagen);
+         console.log(result);
+      },
+      failure: function(result){
+        console.log('kaka');
+        console.log(result);
+      }
+    });
+  }
+
 
   function checkForConflict(periode_id){
 
@@ -93,6 +154,21 @@ $(document).ready(function(){
     return a;
   }
 
+  function setConflictingDays(data){
+    $(".dagdeel").prop('disabled', false);
+    $(".cannotbeused").prop('disabled', true);
+
+    data.conflictdagen.forEach(dag => {
+      $("input[name=Week"+dag.volgorde+"_"+dag.naam.toUpperCase()+"_"+dag.deel+"]").prop('disabled', true);
+    });
+  }
+
+  // function disableConflictingDays(days){
+  //   conflictdagen.forEach(dag => {
+  //
+  //   });
+  // }
+
   function addValueCheck(element){
     element.on('change',function(){
       if ((!start[0].validity.valid) ||
@@ -109,7 +185,7 @@ $(document).ready(function(){
         stop.removeClass("is-invalid");
         start.removeClass("is-invalid");
         clearError();
-      }
+      }/*
       checkForConflict({{$periode->id}}).done(function(data){
         if (data.result!=null){
           element.addClass("is-invalid");
@@ -132,12 +208,22 @@ $(document).ready(function(){
             });
 
         }
+      });*/
+      getStartWeekschemaNr({{$periode->id}}).done(function(data){
+        $("#weekschemaVoorStart").html(data.volgorde);
       });
+      checkConflictingDays({{$periode->id}}).done(function(data){
+        setConflictingDays(data);
+      })
     });
   }
 
   addValueCheck(start);
   addValueCheck(stop);
+
+  checkConflictingDays({{$periode->id}}).done(function(data){
+    setConflictingDays(data);
+  });
 
   $(".delete").on("click", function(e){
       return confirm("U gaat deze periode verwjderen. Bent u zeker?");

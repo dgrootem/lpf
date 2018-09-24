@@ -35,21 +35,28 @@ class PeriodeController extends Controller
     }
 
 
-    private function addDagDeel($schemaDagdeel){
+    private function addDagDeel($schemaDagdeel,$useEloquent){
       $periodeDagDeel = new PeriodeDagDeel;
-      Log::debug($schemaDagdeel);
-      Log::debug(Auth::user()->schools);
+      //Log::debug($schemaDagdeel);
+      //Log::debug(Auth::user()->schools);
       if (in_array($schemaDagdeel->school_id,Auth::user()->schools->pluck('id')->toArray()))
       {
         $periodeDagDeel->status = DagDeel::AVAILABLE;
-        Log::debug("AVAILABLE");
+        //Log::debug("AVAILABLE");
       }
       else{
         $periodeDagDeel->status = DagDeel::UNAVAILABLE;
-        Log::debug("UNAVAILABLE");
+        //Log::debug("UNAVAILABLE");
       }
       //koppel PeriodeDagDeel aan SchemaDagDeel
-      $periodeDagDeel->dagdeel = $schemaDagdeel;
+      if (!$useEloquent){
+          Log::debug("Using plain model");
+        $periodeDagDeel->dagdeel = $schemaDagdeel;
+      }
+      else {
+        Log::debug("Using eloquent model");
+        $periodeDagDeel->dagdeel_id = $schemaDagdeel->id;
+      }
       //$periodeDagDeel["volgorde"] = $schemaDagdeel->dag->volgorde;
       //$periodeWeekSchema->dagdelen->add($periodeDagDeel);
       return $periodeDagDeel;
@@ -92,7 +99,7 @@ class PeriodeController extends Controller
           $pws->volgorde = $ws->volgorde;
           $dagdelen = array();
           foreach ($ws->dagdelen as $sdagdeel) {
-            $dagdelen[] = $this->addDagDeel($sdagdeel);
+            $dagdelen[] = $this->addDagDeel($sdagdeel,false);
 
           }
 
@@ -244,10 +251,10 @@ class PeriodeController extends Controller
 
       //check voor mismatch tussen aantal weekschemas in aanstelling en in periode
       // (kan enkel bij creatie van nieuwe periode)
-      Log::debug($periode->weekschemas->count());
-      Log::debug($aanstelling->weekschemas->count());
+      //Log::debug($periode->weekschemas->count());
+      //Log::debug($aanstelling->weekschemas->count());
 
-      if ($periode->weekschemas->count() <= $aanstelling->weekschemas->count())
+      if ($periode->weekschemas->count() < $aanstelling->weekschemas->count())
       foreach($aanstelling->weekschemas as $a_w){
         $this->newWeekSchema($periode,$a_w);
       }
@@ -266,21 +273,27 @@ class PeriodeController extends Controller
             Log::error('Weekschema '.$_w.' bestaat niet. Aanstelling heeft maar '.$aanstelling->weekschemas->count().' schemas');
             continue;
           }
-          Log::debug($weekschema);
+          //Log::debug($weekschema);
           Log::debug("looking for deel ".$_p." bij dag ".$_d);
           $dagdeel = $weekschema->dagdelen->where('dagdeel.deel',$_p)->where('dagdeel.dag.naam',$_d)->first();
+          Log::debug("setting status to BOOKED");
           $dagdeel->status = DagDeel::BOOKED;
           $dagdeel->save();
+
+          Log::debug($dagdeel->status);
+
         }
       }
+
 
       //referesh the $periode object to account for all the created stuff before calculation
       $periode->load('weekschemas.dagdelen');
 
+
       $aantalDagdelen = $this->calculateAantalDagdelen($periode)['aantalDagdelen'];
 
-      Log::debug('aantalDagdelen=');
-      Log::debug($aantalDagdelen);
+      //Log::debug('aantalDagdelen=');
+      //Log::debug($aantalDagdelen);
       $periode->aantalDagdelen = $aantalDagdelen;
       $periode->save();
 
@@ -293,10 +306,8 @@ class PeriodeController extends Controller
       $pws->volgorde=$aantal+1;
       $periode->weekschemas()->save($pws);
       foreach($aanstellingsWeekschema->dagdelen as $dagdeel){
-        //Log::debug($dagdeel->dag->naam."_".$dagdeel->deel."->".$dagdeel->status);
-        $pdd = new PeriodeDagDeel;
+        $pdd = $this->addDagDeel($dagdeel,true);
         $pdd->dagdeel_id = $dagdeel->id;
-        $pdd->status = DagDeel::UNAVAILABLE;
         $pws->dagdelen()->save($pdd);
       }
       $pws->load('dagdelen.dagdeel.dag');
@@ -317,6 +328,13 @@ class PeriodeController extends Controller
         return redirect('/overzichten');
     }
 
+    public function getStartWeekschemaNr(){
+      $leerkracht = Leerkracht::find(request('leerkracht_id'));
+      $datestart = Carbon::parse(request('datestart'));
+      $volgorde = $leerkracht->aanstelling()->volgordeVoorDatum($datestart)+1;
+      return compact('volgorde');
+    }
+
 
     // -------------------- HELPER FUNCTIONS --------------------
     private function checkDatumInPeriodeConflict($date,$startstop,$leerkracht_id,$periode_id)
@@ -326,6 +344,55 @@ class PeriodeController extends Controller
         return $startstop . "in bestaande periode";
       else
         return null;
+    }
+
+
+
+    public function getConflictingDays(){
+
+
+
+      $datestart = request('datestart');
+      $datestop = request('datestop');
+      $leerkracht_id = request('leerkracht_id');
+      $periode_id = request('periode_id');
+
+
+      $conflictdagen = $this->getConflictDays($datestart,$datestop,$leerkracht_id,$periode_id);
+
+      //return 'stront';
+      Log::debug("Conflictiing days found:");
+      Log::debug($conflictdagen);
+      //$conflictdagen = "blabla";
+      return compact('conflictdagen');
+    }
+
+    public function getConflictDays($datestart,$datestop,$leerkracht_id,$periode_id)
+    {
+
+      //$theRangeData = OverzichtController::rangeForLeerkrachten
+
+      $dstart = Carbon::parse($datestart);
+      $dstop = Carbon::parse($datestop);
+
+      //echo 'START=' . $datestart .' => '. $dstart;
+      //echo 'START=' . $datestop .' => '. $dstop;
+
+
+      //$leerkracht = Leerkracht::with('periodes.weekschemas.dagdelen.schemadagdeel.dag')->find($leerkracht_id);
+
+      $days = DB::table('periodes')
+        ->join('periode_week_schemas','periode_week_schemas.periode_id','=','periodes.id')
+        ->join('periode_dag_deels','periode_dag_deels.periode_week_schema_id','=','periode_week_schemas.id')
+        ->join('schemadagdeel','schemadagdeel.id','=','periode_dag_deels.dagdeel_id')
+        ->join('dotws','dotws.id','=','schemadagdeel.dag_id')
+        ->where('periodes.id','<>',$periode_id) //exclude self
+        ->where('periodes.leerkracht_id','=',$leerkracht_id) //find only for this teacher
+        ->where('periodes.start','<=',$dstop)
+        ->where('periodes.stop','>=',$dstart)
+        ->where('periode_dag_deels.status','=',DagDeel::BOOKED)
+        ->select(['periodes.id','periode_week_schemas.volgorde','schemadagdeel.deel','dotws.naam'])->get()->unique();
+        return $days;
     }
 
 

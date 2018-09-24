@@ -23,6 +23,22 @@ class CalculationController extends Controller
         //Log::debug('lestijden_per_week='.$school->lestijden_per_week);
 
         $leerkrachtIds = $school->leerkrachts()->pluck('id')->toArray();
+        //todo: rekening houden met in welke school een leerkracht stond
+        // voor inplanning
+        //todo: voor elke leerkracht vermenigvuldigen met aantal uren/school voltijdse uren
+        // en dan pas vermenigvuldigen met aantal weken (per leerkracht) om aan max inzetbaarheid te komen per jaar
+        // daarna alles optellen voor totaal per user
+
+        //BETER: tel het aantal dagdelen in de standaard inplanning op school X voor een leerkracht
+        // foreach user->school
+        //  foreach school->leerkrachten:
+        //    foreach leerkracht->aanstelling->weekschemas : $aantal[volgorde] = count(dagdelen d where d.school_id == school->id)
+        // if (AANTAL_WEKEN % aantal weekschemas == 0) som($aantal) * AANTAL_WEKEN / aantal weekschemas;
+        // else
+        //  som($aantal) * floor(AANTAL_WEKEN / aantal_weekschemas)
+        //  for(i=0;i< (AANTAL_WEKEN % aantal_weekschemas); i++) som+=$aantal[i]
+        //deze gegevens kunnen in een aparte tabel op voorhand eenmalig berekend worden
+
 
 
           $dagdelen = Periode::whereIn('leerkracht_id',$leerkrachtIds)

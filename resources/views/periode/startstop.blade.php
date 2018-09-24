@@ -61,6 +61,7 @@
         </p>
         <small id="dateRangeError" class="error" aria-live="polite"></small>
         <div id="berekenUren" class="error" aria-live="polite"></div>
+        <div class="bg-light">Deze periode begint in weekschema <span id="weekschemaVoorStart">{{$periode->leerkracht->aanstelling()->volgordeVoorDatum($periode->start)+1}}</span></div>
       </div>
     </div>
   {{-- </div> --}}

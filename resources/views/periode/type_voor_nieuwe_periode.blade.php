@@ -27,7 +27,7 @@
                     <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->dag->naam)}}_VM"
                     @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) disabled @endif
                     @if ($periodedagdeel->status===\App\DagDeel::BOOKED) checked @endif
-                    class="form-control voormiddag dagdeel" >
+                    class="form-control voormiddag dagdeel @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) cannotbeused @endif" >
                     <span class="mycheckmark"></span>
                   </label>
                 </div>
@@ -40,7 +40,7 @@
                     <input type="checkbox" value="1" name="Week{{$weekschema->volgorde}}_{{strtoupper($periodedagdeel->dagdeel->dag->naam)}}_NM"
                     @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) disabled @endif
                     @if ($periodedagdeel->status===\App\DagDeel::BOOKED) checked @endif
-                    class="form-control voormiddag dagdeel" >
+                    class="form-control voormiddag dagdeel @if($periodedagdeel->status===\App\DagDeel::UNAVAILABLE) cannotbeused @endif" >
                     <span class="mycheckmark"></span>
                   </label>
                 </div>

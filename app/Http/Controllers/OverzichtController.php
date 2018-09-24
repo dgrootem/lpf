@@ -66,7 +66,8 @@ class OverzichtController extends Controller
   }
 
   public function range($startDate = null){
-    $firstweek = Carbon::parse("first monday of september")->weekOfYear;
+    $leerkrachten = Leerkracht::where('actief',1)->with('aanstellingen.weekschemas.dagdelen.school')->get();
+
 
     if (isset($startDate))
       $startOfRange = Carbon::parse($startDate)->startOfWeek(); //start altijd op maandag
@@ -74,14 +75,38 @@ class OverzichtController extends Controller
       $startOfRange = Carbon::today()->startOfWeek();//start altijd op maandag
     }
     //Log::debug($startOfRange);
-
-    setlocale(LC_TIME,'nl-BE');
-    $format = '%d-%m-%Y';
-    $leerkrachten = Leerkracht::where('actief',1)->with('aanstellingen.weekschemas.dagdelen.school')->get();
     $nbdays=env('NBDAYS_IN_OVERZICHT');
 
     $stopOfRange = clone $startOfRange;
     $stopOfRange->addDays($nbdays-1);
+
+    $theRangeData = $this->rangeForLeerkrachten($leerkrachten,$startOfRange,$stopOfRange,$nbdays);
+    $dateRange = $theRangeData['dateRange'];
+    $periodesInRange = $theRangeData['periodesInRange'];
+
+
+    $scholen = CalculationController::totalsForCurrentUser();
+
+    return view('overzicht',compact(['dateRange','periodesInRange','leerkrachten','scholen','startOfRange']));
+
+  }
+
+  public function conflictRangeForLeerkracht(){
+    $datestart = request('datestart');
+    $datestop = request('datestop');
+    $leerkracht_id = request('leerkracht_id');
+    $leerkrachten = Leerkracht::where('id',$leerkracht_id)->get();
+    $nbdays = $datestart->diffInDays($datestop) +1;
+
+    return $this->rangeForLeerkrachten($leerkrachten,$datestart,$datestop,$nbdays);
+  }
+
+  public function rangeForLeerkrachten($leerkrachten,$startOfRange,$stopOfRange,$nbdays)
+  {
+    setlocale(LC_TIME,'nl-BE');
+    $format = '%d-%m-%Y';
+
+    $firstweek = Carbon::parse("first monday of september")->weekOfYear;
 
     $datumIterator = clone $startOfRange;
     $dateRange = array();
@@ -256,14 +281,15 @@ class OverzichtController extends Controller
         } else $datumIterator->addDays(7); //skip a week
       }
     }
-    $scholen = CalculationController::totalsForCurrentUser();
-
-    return view('overzicht',compact(['dateRange','periodesInRange','leerkrachten','scholen','startOfRange']));
+    return array('dateRange' => $dateRange,'periodesInRange' => $periodesInRange);
   }
 
   private function processDagDeel($periodeDagDeel,$visualisatieDagdeel,$part,$periode){
     //Log::debug("trying $part....");
-    if (($visualisatieDagdeel->status==DagDeel::AVAILABLE) && ($periodeDagDeel->status==DagDeel::BOOKED))
+    if (
+      //($visualisatieDagdeel->status==DagDeel::AVAILABLE) &&
+      ($periodeDagDeel->status==DagDeel::BOOKED)
+      )
     {
       //Log::debug($part.'=BOOKED');
       $visualisatieDagdeel->status=DagDeel::BOOKED;

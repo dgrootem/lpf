@@ -23,6 +23,10 @@ class Leerkracht extends Model
       return $this->aanstellingen()->first();
     }
 
+    public function periodes(){
+      return $this->hasMany(Periode::class);
+    }
+
 /*
     public function scopeBelongsToSchool($query,$school_id){
       return $query->where('MA_VM',$school_id)
