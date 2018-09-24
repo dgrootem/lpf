@@ -134,6 +134,7 @@ class OverzichtController extends Controller
         $aantalWeekSchemas = 0;
       }
 
+
       $currentWeekTeller = -1;
       $datumIterator = clone $startOfRange;
       $huidigeWeek = null;
@@ -146,7 +147,7 @@ class OverzichtController extends Controller
         $formattedDate = $datumIterator->formatLocalized($format);
         //
         //trivial case
-        if ($aantalAanstellingen == 0){
+        if (($aantalAanstellingen == 0) || ($aantalWeekSchemas==0)) {
           //Log::debug("Geen aanstelling voor ".$leerkracht->naam."..skip");
           $dateRange[$formattedDate]['VM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
           $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;

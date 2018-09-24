@@ -81,8 +81,13 @@ class LeerkrachtController extends Controller
         //added default value for einde aanstelling
         $aanstelling->stop = Carbon::parse(Carbon::today()->year+1 . '-06-30');
         $leerkracht->aanstellingen()->save($aanstelling);
+        $leerkracht->load('aanstellingen');
+      }
+      $aanstelling= $leerkracht->aanstelling();
+      if (!isset($aanstelling->weekschemas) || ($aanstelling->weekschemas->isEmpty()))  {
         $weekschema = $this->newWeekSchema($aanstelling);
-        $weekschema->load('dagdelen');
+        //$weekschema->load('dagdelen');
+      }
         //return $weekschema;
         //$aanstelling->weekschemas()->save($weekschema);
 
@@ -93,7 +98,7 @@ class LeerkrachtController extends Controller
         $leerkracht = $leerkracht->load('aanstellingen.weekschemas.dagdelen');
 
         //return compact('leerkracht','aanstelling');
-      }
+
       //$leerkracht = $leerkracht->fresh()->with('aanstellingen.weekschemas.dagdelen');
       //return compact('leerkracht','aanstelling');
       //return $leerkracht->aanstellingen->first()->weekschemas->first()->voormiddagenFull()->get();
