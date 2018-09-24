@@ -64,51 +64,6 @@ class OverzichtController extends Controller
 
     //return $dagdeel;
   }
-/*
-  private function datumStatus($datum,$leerkracht,$firstweek){
-
-    $weekTeller = $datum->weekOfYear - $firstweek; //TODO: fixen voor na januari
-
-    $aantalWeekSchemas = $leerkracht->aanstellingen->first()->weekschemas->count();
-    $huidigeWeek = $weekTeller % $aantalWeekSchemas +1; //we tellen Week1 , Week2, ... terwijl mod functie begint bij 0
-
-    $weekschema = $leerkracht->aanstellingen->first()->weekschemas->where('volgorde',$huidigeWeek);
-
-    $dagnr = $datum->dayOfWeek;
-    //Log::debug("dag van de week=".$dag);
-
-    $dag = new Dag;
-
-    $dag->vm = new DagDeel;
-    $dag->vm->naam = $this->shortDayOfWeek($dagnr) . '_vm';
-    $dag->nm = new DagDeel;
-    $dag->nm->naam = $this->shortDayOfWeek($dagnr) . '_nm';
-
-    switch($dagnr){
-      case 0 :
-        $dag->vm->status = DagDeel::UNAVAILABLE;
-        $dag->nm->status = DagDeel::UNAVAILABLE;
-      break;
-      case 3 :
-        $dag->vm = $this->fillDagDeel($leerkracht->wo_vm,$dag->vm);
-        $dag->nm->status = DagDeel::UNAVAILABLE;
-      break;
-      case 6 :
-        $dag->vm->status = DagDeel::UNAVAILABLE;
-        $dag->nm->status = DagDeel::UNAVAILABLE;
-      break;
-      default:
-        //Log::debug("default case");
-        $dag->vm = $this->fillDagDeel(School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dagnr)."_vm")]),$dag->vm);
-        $dag->nm = $this->fillDagDeel(School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dagnr)."_nm")]),$dag->nm);
-        //School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_vm")]),
-        //             'NM' => School::find($leerkracht->toArray()[strtoupper($this->shortDayOfWeek($dag)."_nm")]));
-    }
-
-    return $dag;
-
-  }
-  */
 
   public function range($startDate = null){
     $firstweek = Carbon::parse("first monday of september")->weekOfYear;
@@ -255,38 +210,50 @@ class OverzichtController extends Controller
       Log::debug("Deze liggen in ".$aantalWeken." weken");
       $datumIterator = clone $start->startOfWeek();
 
-      $a_start = Carbon::parse($periode->leerkracht->aanstelling()->start);
-      $a_stop = Carbon::parse($periode->leerkracht->aanstelling()->stop);
+      $a = $periode->leerkracht->aanstelling();
+
+      $a_start = Carbon::parse($a->start);
+      $a_stop = Carbon::parse($a->stop);
 
       $startWeekVanAanstelling = $a_start->weekOfYear;
+      //Log::debug("Startweek aanstelling".$startWeekVanAanstelling);
+
 
       $aantalWeekSchemas = $periode->weekschemas->count();
-
+      //Log::debug("Aantal weekschemas voor deze periode ".$aantalWeekSchemas);
 
 
       for($i=1;$i<=$aantalWeken;$i++){
-        $currentWeekVolgorde = (($datumIterator->weekOfYear - $startWeekVanAanstelling) % $aantalWeekSchemas) ;
-        $pws = $periode->weekschemas[$currentWeekVolgorde];
+        Log::debug("Huidige week=".$datumIterator->weekOfYear);
+        //$currentWeekVolgorde = (($datumIterator->weekOfYear - $startWeekVanAanstelling) % $aantalWeekSchemas);
+        $currentWeekVolgorde = $a->volgordeVoorDatum($datumIterator);
 
-        $voormiddagen=PeriodeController::voormiddagen($pws);
-        $namiddagen=PeriodeController::namiddagen($pws);
+        //only process weeks after the start of the aanstelling
+        if ($currentWeekVolgorde>=0){
+        //if ($datumIterator->weekOfYear >= $startWeekVanAanstelling) {
+          Log::debug("[".$periode->leerkracht->naam."] Huidig weekschema ".$currentWeekVolgorde);
+          $pws = $periode->weekschemas[$currentWeekVolgorde];
 
-        for($j=1;$j<=7;$j++)
-        {
-          //skip ZA & ZO + skip dagen die voor de startdag vallen
-          if (($j<=5) && ($datumIterator>=$ps) && ($datumIterator<=$pe))
+          $voormiddagen=PeriodeController::voormiddagen($pws);
+          $namiddagen=PeriodeController::namiddagen($pws);
+
+          for($j=1;$j<=7;$j++)
           {
-            $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
-            if (!(($datumIterator == $ps) && (strcmp($psd,'NM')==0)))
+            //skip ZA & ZO + skip dagen die voor de startdag vallen
+            if (($j<=5) && ($datumIterator>=$ps) && ($datumIterator<=$pe))
             {
-              $this->processDagDeel($voormiddagen[$j-1],$dagDeel,'VM',$periode);
+              $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
+              if (!(($datumIterator == $ps) && (strcmp($psd,'NM')==0)))
+              {
+                $this->processDagDeel($voormiddagen[$j-1],$dagDeel,'VM',$periode);
+              }
+              $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
+              if (!(($datumIterator == $pe) && (strcmp($ped,'VM')==0)))
+                $this->processDagDeel($namiddagen[$j-1],$dagDeel,'NM',$periode);
             }
-            $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['NM'][$lkrid];
-            if (!(($datumIterator == $pe) && (strcmp($ped,'VM')==0)))
-              $this->processDagDeel($namiddagen[$j-1],$dagDeel,'NM',$periode);
+            $datumIterator->addDays(1);
           }
-          $datumIterator->addDays(1);
-        }
+        } else $datumIterator->addDays(7); //skip a week
       }
     }
     $scholen = CalculationController::totalsForCurrentUser();

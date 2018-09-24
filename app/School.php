@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class School extends Model
 {
@@ -13,15 +14,15 @@ class School extends Model
     }
 
     public function leerkrachts(){
-      return $this->hasMany(Leerkracht::class,'MA_VM')
-      ->union($this->hasMany(Leerkracht::class,'MA_NM'))
-      ->union($this->hasMany(Leerkracht::class,'DI_VM'))
-      ->union($this->hasMany(Leerkracht::class,'DI_NM'))
-      ->union($this->hasMany(Leerkracht::class,'WO_VM'))
-      ->union($this->hasMany(Leerkracht::class,'DO_VM'))
-      ->union($this->hasMany(Leerkracht::class,'DO_NM'))
-      ->union($this->hasMany(Leerkracht::class,'VR_VM'))
-      ->union($this->hasMany(Leerkracht::class,'VR_NM'));
+        $leerkrachten = DB::table('leerkrachts')
+            ->join('aanstellings','aanstellings.leerkracht_id','=','leerkrachts.id')
+            ->join('weekschema','weekschema.aanstelling_id','=','aanstellings.id')
+            ->join('schemadagdeel','schemadagdeel.weekschema_id','=','weekschema.id')
+            ->where('schemadagdeel.school_id',$this->id)
+            ->select('leerkrachts.id')
+            ->get()->unique()->pluck('id')->toArray();
+        return Leerkracht::whereIn('id',$leerkrachten);
+      //return $leerkrachts->where('school_id',$this->id);
     }
 
     public function users(){

@@ -20,21 +20,21 @@ class CalculationController extends Controller
       foreach ($scholenraw as $key => $school) {
         $scholen[$school->id]['naam'] = $school->naam;
         Log::debug('school='.$school->naam);
-        Log::debug('lestijden_per_week='.$school->lestijden_per_week);
+        //Log::debug('lestijden_per_week='.$school->lestijden_per_week);
 
-        $leerkrachtIds = $school->leerkrachts->pluck('id')->toArray();
+        $leerkrachtIds = $school->leerkrachts()->pluck('id')->toArray();
 
-        foreach (Status::all() as $key => $status) {
-          $uren = Periode::whereIn('leerkracht_id',$leerkrachtIds)
-                    ->where('status_id',$status->id)
+
+          $dagdelen = Periode::whereIn('leerkracht_id',$leerkrachtIds)
+                    ->where('status_id',2)
                     ->where('deleted',0)
                     ->sum('aantalDagdelen');
-          Log::debug('uren='.$uren);
-          $scholen[$school->id][$status->omschrijving] = $uren;
-        }
+          Log::debug('uren='.$dagdelen);
+          $scholen[$school->id]['RV'] = $dagdelen;
+
         $scholen[$school->id]['unused'] =
-            $school->lestijden_per_week * CalculationController::AANTAL_WEKEN -
-            ($scholen[$school->id]['RV'] + $scholen[$school->id]['ZT']);
+            9 * CalculationController::AANTAL_WEKEN -
+            ($scholen[$school->id]['RV']);// + $scholen[$school->id]['ZT']);
       }
       //Log::debug(CalculationController::AANTAL_WEKEN);
       //Log::debug($scholen);

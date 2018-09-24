@@ -32,4 +32,6 @@ class Weekschema extends Model
     public function scopeNamiddagenFull($query){
       return SchemaDagDeel::where('weekschema_id',$this->id)->where('deel','NM');
     }
+
+    
 }

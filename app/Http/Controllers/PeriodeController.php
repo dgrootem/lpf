@@ -63,8 +63,12 @@ class PeriodeController extends Controller
      */
     public function create()
     {
+        $lkrid = request('leerkracht');
 
-        $leerkracht = Leerkracht::find(request('leerkracht'))->with('aanstellingen.weekschemas.dagdelen.dag')->first();
+        $leerkracht = Leerkracht::with('aanstellingen.weekschemas.dagdelen.dag')->find($lkrid);
+        if ($leerkracht->aanstellingen->count() == 0)
+        return redirect(url('/leerkracht/'.$lkrid.'/edit'));
+        //return compact('leerkracht');
         //return $leerkracht;
         //$leerkracht->load('aanstelling.weekschemas.dagdelen');
         $datum = request("datum");
@@ -82,66 +86,35 @@ class PeriodeController extends Controller
         //we put RELATIONS in arrays, so we dont need key values
         $weekschemas = array();
 
-        //DB::beginTransaction();
-        //try{
-          //$periode->save();
-          //$periode->weekschemas = new Collection;
+        foreach($leerkracht->aanstellingen->first()->weekschemas as $ws)
+        {
+          $pws = new PeriodeWeekSchema;
+          $pws->volgorde = $ws->volgorde;
+          $dagdelen = array();
+          foreach ($ws->dagdelen as $sdagdeel) {
+            $dagdelen[] = $this->addDagDeel($sdagdeel);
 
-          //return $leerkracht->aanstellingen->first()->weekschemas;
-          //$periode->weekschemas = new \Illuminate\Database\Eloquent\Collection;
-          foreach($leerkracht->aanstellingen->first()->weekschemas as $ws)
-          {
-            $pws = new PeriodeWeekSchema;
-            $pws->volgorde = $ws->volgorde;
-            $dagdelen = array();
-            foreach ($ws->dagdelen as $sdagdeel) {
-              $dagdelen[] = $this->addDagDeel($sdagdeel);
-
-            }
-            //return $dagdelen;
-
-            /*
-            $periodeDagDeel = new PeriodeDagDeel;
-            $woensdagnm = new SchemaDagDeel;
-            $woensdagnm->dag = DOTW::where('naam','wo')->first();
-            //return $woensdagnm->dag;
-            $woensdagnm->deel = 'NM';
-            $woensdagnm->school_id = 1;
-
-            $periodeDagDeel->status = DagDeel::UNAVAILABLE;
-            $periodeDagDeel->dagdeel = $woensdagnm;
-            $periodeDagDeel->volgorde = $woensdagnm->dag->volgorde;
-            //return $woensdagnm;
-
-            $dagdelen[]  =$this->addDagDeel($woensdagnm);
-            */
-            $pws->dagdelen = $dagdelen;
-            $weekschemas[] = $pws;
-            //Log::debug($pws);
           }
-          //return $weekschemas;
-          $periode->weekschemas = $weekschemas;
 
-          $scholenlijst = School::alle()->pluck('naam','id');
+          $pws->dagdelen = $dagdelen;
+          $weekschemas[] = $pws;
+        }
+        $periode->weekschemas = $weekschemas;
 
-          //TODO: in javascript de juiste ophalen
-          $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
-          $ambts = Ambt::pluck('naam','id');
+        $scholenlijst = School::alle()->pluck('naam','id');
 
-          //$statuses = Status::where('choosable',1)->get();
+        //TODO: in javascript de juiste ophalen
+        $periode->aantal_uren_van_titularis = School::find(1)->school_type->noemer;
+        $ambts = Ambt::pluck('naam','id');
 
-          $scholen = CalculationController::totalsForCurrentUser();
-        // }catch(\Exception $e){
-        //   //DB::rollback();
-        //   throw $e;
-        // }
-        //return $periode;
-        $dagen = DOTW::orderBy('volgorde')->get();
+        $scholen = CalculationController::totalsForCurrentUser();
+
+        //$dagen = DOTW::orderBy('volgorde')->get();
         $user = Auth::user()->load('schools');
-        ;
-        //return PeriodeController::namiddagen($periode->weekschemas->first());
 
-        return view('periode.create',compact('periode','ambts','scholen','scholenlijst','dagen'));
+        //return compact('periode');
+
+        return view('periode.create',compact('periode','ambts','scholen','scholenlijst'));
     }
 
 
@@ -154,10 +127,6 @@ class PeriodeController extends Controller
           $result[] = $dagdeel;
       }
       return $result;
-          /*
-      return array_filter($weekschema->dagdelen->load('dagdeel')->toArray(), function ($var){
-        return ($var["dagdeel"]["deel"] === 'VM');
-      });*/
     }
 
     public static function namiddagen($weekschema){
@@ -209,14 +178,15 @@ class PeriodeController extends Controller
      */
     public function edit(Periode $periode)
     {
-        //return compact('periode');
-        $statuses = Status::where('choosable',1)->get();
+      $periode->load('weekschemas.dagdelen.dagdeel');
+          //return compact('periode');
+        //$statuses = Status::where('choosable',1)->get();
         $ambts = Ambt::pluck('naam','id');
         //Log::debug('edit route');
         //Log::debug(compact('periode'));
         $scholenlijst = School::alle()->pluck('naam','id');
         $scholen = CalculationController::totalsForCurrentUser();
-        return view('periode.edit',compact(['periode','statuses','ambts','scholen','scholenlijst']));
+        return view('periode.edit',compact(['periode','ambts','scholen','scholenlijst']));
     }
 
     /**
@@ -249,16 +219,19 @@ class PeriodeController extends Controller
       return $value;
     }
 
-    public function fillPeriode(Request $request,Periode $periode){
+    public function fillPeriode(Request $request,Periode $periode)
+    {
+      $leerkracht = Leerkracht::with('aanstellingen')->find($this->fromRequest('leerkracht_id'));
+      $aanstelling = $leerkracht->aanstelling();
 
-      //DB::beginTransaction();
-      try{
-      $periode->start = Carbon::parse($this->fromRequest('start'));
+
+
+      $periode->start = max($aanstelling->start,Carbon::parse($this->fromRequest('start')));
       $periode->startDagDeel = $this->fromRequest('startDagDeel');
-      $periode->stop = Carbon::parse($this->fromRequest('stop'));
+      $periode->stop = min($aanstelling->stop,Carbon::parse($this->fromRequest('stop')));
       $periode->stopDagDeel = $this->fromRequest('stopDagDeel');
       $periode->school_id = $this->fromRequest('school_id');
-      $periode->leerkracht_id = $this->fromRequest('leerkracht_id');
+      $periode->leerkracht_id = $leerkracht->id;
       $periode->aantal_uren_van_titularis = $this->fromRequest('aantal_uren_van_titularis');
       $periode->status_id = $this->fromRequest('status_id');
       $periode->opmerking = $this->fromRequest('opmerking');
@@ -269,6 +242,7 @@ class PeriodeController extends Controller
 
       $data = request()->all();
 
+      //TODO: we moeten kijken hoeveel weekschemas er zijn gekoppeld aan de leerkracht
 
       foreach($data as $key => $value){
         if (strpos($key,"Week")===0){ //we hebben een checkbox voor een TOEWIJZING
@@ -293,11 +267,7 @@ class PeriodeController extends Controller
       Log::debug($aantalDagdelen);
       $periode->aantalDagdelen = $aantalDagdelen;
       $periode->save();
-    }catch(\Exception $e){
-      //DB::rollback();
-      throw $e;
-    }
-    DB::commit();
+
     }
 
 
@@ -310,7 +280,7 @@ class PeriodeController extends Controller
         //Log::debug($dagdeel->dag->naam."_".$dagdeel->deel."->".$dagdeel->status);
         $pdd = new PeriodeDagDeel;
         $pdd->dagdeel_id = $dagdeel->id;
-        $pdd->status = -1;
+        $pdd->status = DagDeel::UNAVAILABLE;
         $pws->dagdelen()->save($pdd);
       }
       $pws->load('dagdelen.dagdeel.dag');
@@ -372,88 +342,6 @@ class PeriodeController extends Controller
     }
 
 
-/*
-    function checkAndFix($periodeToCheckFor){
-      $oudePeriode = Periode::find($periodeToCheckFor->id);
-
-      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->start,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-      if (!is_null($periode)){
-        if ($periode->status_id != Status::opengesteld()) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
-        //ALS de stop valt na de stop van de al bestaande periode -> splits de bestaande periode
-        if ($periode->stop >= $periodeToCheckFor->stop)
-        {
-          $nieuwePeriode = $periode->replicate();
-          $newstart = clone $periodeToCheckFor->stop;
-          $newstart->addDays(1);
-          $nieuwePeriode->start= $newstart;
-          $nieuwePeriode->save();
-        }
-
-        //overlap met bestaande opengestelde periode -> aanpassen door deze vroeger te laten stoppen
-        $newstop = clone $periodeToCheckFor->start;
-        $newstop->addDays(-1);
-        $periode->stop =  $newstop;
-        $periode->save();
-      }
-
-      //doe nu hetzelfde voor de stopdatum
-      $periode = $this->periodeDieDatumBevat($periodeToCheckFor->stop,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-      if (!is_null($periode)){
-        if ($periode->status_id != Status::opengesteld()) throw new \Exception("Periode overlapt met bestaande niet-opengestelde periode", 1);
-        //overlap met bestaande opengestelde periode -> aanpassen door deze later te laten starten
-        $newstart = clone $periodeToCheckFor->stop;
-        $newstart->addDays(1);
-        $periode->start = $newstart;
-        $periode->save();
-      }
-
-      //check of de periode waarvoor we checks doen andere periodes bevat
-      //deze moeten dan verwijderd worden
-      $periodes = Periode::openPeriodesInRangeForLeerkracht($periodeToCheckFor->start,
-                                                            $periodeToCheckFor->stop,
-                                                            $periodeToCheckFor->leerkracht_id,
-                                                            $periodeToCheckFor->id
-                                                            )->get();
-      foreach ($periodes as $key => $thePeriode) {
-        $thePeriode->deleted = 1;
-        $thePeriode->save();
-      }
-
-      //check of de periode gekrompen is en oude 'verwijderde' opengestelde periodes terug vrijgeeft
-      if (!is_null($oudePeriode)){
-        $oudestart = $oudePeriode->start;
-        $oudestop = $oudePeriode->stop;
-        if ($oudestart < $periodeToCheckFor->start)
-        {
-          $end= Carbon::parse($periodeToCheckFor->start);
-          $end->addDays(-1);
-          $this->resetPeriodesInRange($oudestart,$end,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-        }
-        if ($periodeToCheckFor->stop < $oudestop){
-          $begin= Carbon::parse($periodeToCheckFor->stop);
-          $begin->addDays(1);
-          $this->resetPeriodesInRange($begin,$oudestop,$periodeToCheckFor->leerkracht_id,$periodeToCheckFor->id);
-        }
-      }
-    }
-
-    function resetPeriodesInRange($start,$stop,$leerkracht_id,$mezelf){
-      $periodes = Periode::deletedPeriodesInRangeForLeerkracht($start,$stop,$leerkracht_id,$mezelf)->get();
-      foreach ($periodes as $key => $thePeriode) {
-        $thePeriode->deleted = 0;
-        $thePeriode->save();
-      }
-    }
-
-    function periodeDieDatumBevat($date,$leerkracht_id,$mezelf){
-      $periode = Periode::where('id','<>',$mezelf)  //exclude matching with myself when editing a period
-                    ->where('leerkracht_id',$leerkracht_id)
-                    ->where('start','<=',$date)
-                    ->where('stop','>=',$date)->first();
-      return $periode;
-    }
-    */
-
     //TODO: herschalen wanneer LPF-leerkracht in ander systeem werkt dan aantal_uren_van_titularis:
     //  bijvoorbeeld: titularis werkt in BaO in /24, LPF in /22, dan is 19/24 te herschalen naar 17,5/22 ??
     // TODO: wat met onvolledige weken? hoe worden dan woensdagen geteld?
@@ -463,7 +351,10 @@ class PeriodeController extends Controller
     //    iemand die vervanging doet van donderdag tot dinsdag? 4 dagen aan 24/24 ?
     function calculateAantalDagdelen($periode)
     {
-      $aantalWeken = $periode->stop->weekOfYear - $periode->start->weekOfYear +1;
+      //$aantalWeken = $periode->stop->weekOfYear - $periode->start->weekOfYear +1;
+      //houd rekening met volgend kalenderjaar
+      // ->verschil in dagen /7, en elke begonnen week moet meegerekend worden
+      $aantalWeken = ceil(($periode->start->diffInDays($periode->stop)+1)/7);
       Log::debug("aantal weken=".$aantalWeken);
 
       // voor de eerste week:
@@ -477,41 +368,48 @@ class PeriodeController extends Controller
       //    anders
       //      en overloop de dagen van de week tot aan de stopdatum
       $aantalWeekSchemas = $periode->weekschemas->count();
-      $a_start = Carbon::parse($periode->leerkracht->aanstelling()->start);
-      $a_stop = Carbon::parse($periode->leerkracht->aanstelling()->stop);
+      $a = $periode->leerkracht->aanstelling();
+      $a_start = Carbon::parse($a->start);
+      $a_stop = Carbon::parse($a->stop);
 
       $startWeekVanAanstelling = $a_start->weekOfYear;
 
       $p_start = Carbon::parse($periode->start);
       $p_stop = Carbon::parse($periode->stop);
 
-        $datumIterator = clone $p_start;
+      $datumIterator = clone $p_start;
       $aantalDagdelen = 0;
 
       for($i=1;$i<=$aantalWeken;$i++){
-        $currentWeekVolgorde = (($datumIterator->weekOfYear - $startWeekVanAanstelling) % $aantalWeekSchemas) ;
-        $pws = $periode->weekschemas[$currentWeekVolgorde];
-        $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->where('status',DagDeel::BOOKED)->get();
+        //$currentWeekVolgorde = (($datumIterator->weekOfYear - $startWeekVanAanstelling) % $aantalWeekSchemas) ;
+        $currentWeekVolgorde = $a->volgordeVoorDatum($datumIterator);
+        //only process weeks after the start of the aanstelling
+        if ($currentWeekVolgorde>=0){
+        //if ($datumIterator->weekOfYear > $startWeekVanAanstelling) { //only process weeks after the start of the aanstelling
+          $pws = $periode->weekschemas[$currentWeekVolgorde];
+          $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->where('status',DagDeel::BOOKED)->get();
+          Log::debug($current_dagdelen);
 
-        if ($i==1){ //eerste week speciaal behandelen
-          $startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_start->dayOfWeek))->pluck('volgorde')->first();
-          foreach($current_dagdelen as $currentDagDeel)
-          {
-            if ($currentDagDeel->dagdeel->dag->volgorde >= $startDagVolgorde)
-              $aantalDagdelen++;
+          if ($i==1){ //eerste week speciaal behandelen
+            $startDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_start->dayOfWeek))->pluck('volgorde')->first();
+            foreach($current_dagdelen as $currentDagDeel)
+            {
+              if ($currentDagDeel->dagdeel->dag->volgorde >= $startDagVolgorde)
+                $aantalDagdelen++;
+            }
           }
-        }
-        else if ($i==$aantalWeken){ //laatste week speciaal behandelen
-          $stopDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_stop->dayOfWeek))->pluck('volgorde')->first();
-          foreach($current_dagdelen as $currentDagDeel)
-          {
-            if ($currentDagDeel->dagdeel->dag->volgorde <= $stopDagVolgorde)
-              $aantalDagdelen++;
-          }
+          else if ($i==$aantalWeken){ //laatste week speciaal behandelen
+            $stopDagVolgorde = DOTW::where('naam',OverzichtController::shortDayOfWeek($p_stop->dayOfWeek))->pluck('volgorde')->first();
+            foreach($current_dagdelen as $currentDagDeel)
+            {
+              if ($currentDagDeel->dagdeel->dag->volgorde <= $stopDagVolgorde)
+                $aantalDagdelen++;
+            }
 
-        }
-        else{ //normal case
-          $aantalDagdelen += $current_dagdelen->count();
+          }
+          else{ //normal case
+            $aantalDagdelen += $current_dagdelen->count();
+          }
         }
         $datumIterator->addDays(7); //spring steeds een week verder
       }

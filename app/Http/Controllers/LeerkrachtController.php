@@ -78,6 +78,8 @@ class LeerkrachtController extends Controller
       {
         $aanstelling = new Aanstelling;
         $aanstelling->start = Carbon::parse(Carbon::today()->year . '-10-01');
+        //added default value for einde aanstelling
+        $aanstelling->stop = Carbon::parse(Carbon::today()->year+1 . '-06-30');
         $leerkracht->aanstellingen()->save($aanstelling);
         $weekschema = $this->newWeekSchema($aanstelling);
         $weekschema->load('dagdelen');
