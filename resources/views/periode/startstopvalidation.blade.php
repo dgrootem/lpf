@@ -173,6 +173,7 @@ $(document).ready(function(){
   function setOpdrachtBreuk(value){
     getOpdrachtBreukData(value).done(function(data){
       $("#aantal_uren_van_titularis").val(data.teller);
+      $("#aantal_uren_van_titularis").attr('max',data.noemer);
       $("#opdrachtbreuk-noemer").val("/"+data.noemer);
     });
   }
