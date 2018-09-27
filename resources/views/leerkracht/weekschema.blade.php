@@ -1,9 +1,12 @@
+
 <div class="card" id="weekschema{{$weekschema->volgorde}}">
   <div class="card-header" id="heading1">
     <h5 class="mb-0">
       <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse1" aria-expanded="true" aria-controls="collapse1" id="toggleButton{{$weekschema->volgorde}}">
         Weekschema week {{$weekschema->volgorde}}
+
       </button>
+
     </h5>
   </div>
   <div id="collapse1" class="collapse show" aria-labelledby="heading1" data-parent="#accordion">
@@ -55,7 +58,9 @@
                           <div class="p-2 bd-highlight flex-fill">
                             <label class="btn mycontainer">
                               <input type="radio" value="{{$school->id}}" name="Week{{$weekschema->volgorde}}_{{strtoupper($dag->naam)}}_VM"
-                              @if(LeerkrachtController::voormiddagen($weekschema)[$dag->naam]->school_id==$school->id) checked @endif class="form-control voormiddag dagdeel" >
+                              @if(LeerkrachtController::voormiddagen($weekschema)[$dag->naam]->school_id==$school->id) checked @endif class="form-control voormiddag dagdeel"
+                              @if (!$allowChanges) disabled @endif
+                              >
                               <span class="mycheckmark"></span>
                             </label>
                           </div>
@@ -70,6 +75,7 @@
                               <input type="radio" value="{{$school->id}}" name="Week{{$weekschema->volgorde}}_{{strtoupper($dag->naam)}}_NM"
                               @if(!($dag->naam === 'wo'))
                                 @if(LeerkrachtController::namiddagen($weekschema)[$dag->naam]->school_id==$school->id) checked @endif
+                                @if (!$allowChanges) disabled @endif
                               @endif
                               class="form-control namiddag dagdeel" >
                               <span class="mycheckmark"></span>

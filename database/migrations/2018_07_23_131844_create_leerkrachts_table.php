@@ -22,8 +22,12 @@ class CreateLeerkrachtsTable extends Migration
 
             //$table->string('lestijden_per_week');
 
+            $table->string('opmerking')->nullable();
+            $table->string('wilook')->nullable();
 
-            $table->smallInteger('actief'); // ja / nee
+
+
+            $table->smallInteger('actief')->default(1); // ja / nee
             $table->timestamps();
 
             //$table->foreign('vaste_school_id')->references('id')->on('schools');

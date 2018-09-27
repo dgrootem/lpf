@@ -91,7 +91,7 @@ class LeerkrachtController extends Controller
         //return $weekschema;
         //$aanstelling->weekschemas()->save($weekschema);
 
-
+        $allowChanges = ($leerkracht->periodes->count()==0);
 
 
         //reload relationships
@@ -103,7 +103,7 @@ class LeerkrachtController extends Controller
       //return compact('leerkracht','aanstelling');
       //return $leerkracht->aanstellingen->first()->weekschemas->first()->voormiddagenFull()->get();
 
-      return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen']));
+      return view('leerkracht.edit',compact(['leerkracht','beschikbarescholen','dagen','allowChanges']));
     }
 
     /**
@@ -118,6 +118,13 @@ class LeerkrachtController extends Controller
         //if we get here, there is always at least 1 aanstelling + weekschema
         $leerkracht->load('aanstellingen.weekschemas.dagdelen');
         $data = request()->all();
+
+        //return $data;
+
+        $leerkracht->opmerking = request('opmerking');
+        $leerkracht->wilook = request('wilook');
+
+        $leerkracht->save();
 
       //  return $data;
         //we gaan voorlopig uit van 1 aanstelling per leerkracht

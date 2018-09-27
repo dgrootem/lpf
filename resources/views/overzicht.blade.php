@@ -14,7 +14,7 @@
         </a>
       </th>
       @foreach ($leerkrachten as $key => $leerkracht)
-      <th>
+      <th id="lkrheader_{{$leerkracht->id}}" title='test'>
         <a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a>
         <a href="{{url('/leerkracht/'.$leerkracht->id.'/edit')}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
       </th>
@@ -39,6 +39,21 @@
     @endforeach
   </table>
 </div>
+
+@foreach ($leerkrachten as $key => $leerkracht)
+<div id="popover-content_{{$leerkracht->id}}" class="hide">
+  <div><strong>Ambt:</strong> {{$leerkracht->ambt->naam}}</div>
+  @if(( $leerkracht->wilook != null ) && ($leerkracht->wilook !== ''))
+    <div><strong>Wil ook:</strong></div>
+    <div>{{$leerkracht->wilook}}dsfkqjdqklsjfklqdjfklqdsj</div>
+  @endif
+  @if(( $leerkracht->opmerking != null ) && ($leerkracht->opmerking !== ''))
+    <div><strong>Opmerking:</strong></div>
+    <div>{{$leerkracht->opmerking}}dsfkqjdqklsjfklqdjfklqdsj</div>
+  @endif
+</div>
+@endforeach
+
 @endsection
 
 @section('page-specific-scripts')
@@ -57,6 +72,18 @@ $(document).ready(function () {
                           +"&datum="+$(this).data("datum");
 
   });
+
+
+  @foreach ($leerkrachten as $key => $leerkracht)
+  $('#lkrheader_{{$leerkracht->id}}').tooltip({
+    html: true,
+	content: function() {
+          return $("#popover-content_{{$leerkracht->id}}").html();
+        }
+});
+
+  @endforeach
+
 });
 </script>
 

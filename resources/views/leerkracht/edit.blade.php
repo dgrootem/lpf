@@ -12,9 +12,53 @@
   @csrf
   <div class="container">
     <div class="row">
+      @if ($allowChanges)
       <button type="button" class="btn btn-success" id="addWeekschema">Nieuw weekschema</button>
+      @endif
       <div class="col badge badge-primary btn-block"><h2>{{$leerkracht->naam}}</h2></div>
     </div>
+    <div class="row">
+      <div class="col-6">
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <label class="label label-primary" for="opmerking">Ambt</label>
+            </div>
+            <div class="col">
+              <input class="form-control" type="text" name="ambt" value="{{$leerkracht->ambt->naam}}" readonly>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="container">
+                <div class="row">
+                  <label class="label label-default" for="wilook">Wil ook</label>
+                </div>
+                <div class="row">
+                  <textarea name="wilook" rows="3" class="form-control" style="min-width: 100%">{{$leerkracht->wilook}}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="container">
+          <div class="row">
+            <label class="label label-default" for="opmerking">Opmerking</label>
+          </div>
+          <div class="row">
+            <textarea name="opmerking" rows="4" class="form-control" style="min-width: 100%">{{$leerkracht->opmerking}}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (!$allowChanges)
+      <div class="row bg-warning">
+        <strong>OPGELET: Er zijn periodes gekoppeld aan deze leerkracht.<br>U kan dit schema niet wijzigen.</strong>
+      </div>
+     @endif
     <div class="row">
       <div id="accordion">
         @foreach($leerkracht->aanstellingen as $aanstelling)
