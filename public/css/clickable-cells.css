@@ -3,6 +3,7 @@ td.clickablecell  {
   text-align: center;
   font-size: 10px;
   padding: 0px;
+  cursor: pointer;
 }
 
 

@@ -15,11 +15,11 @@
       </th>
       @foreach ($leerkrachten as $key => $leerkracht)
       <th id="lkrheader_{{$leerkracht->id}}" title='test'>
-        @if($leerkracht->aanstelling()->weekschemas->count()>0)
+        {{-- @if($leerkracht->aanstelling()->weekschemas->count()>0)
         <a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a>
-        @else
+        @else --}}
         {{ $leerkracht->naam}}
-        @endif
+        {{-- @endif --}}
         <a href="{{url('/leerkracht/'.$leerkracht->id.'/edit')}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
       </th>
       @endforeach
