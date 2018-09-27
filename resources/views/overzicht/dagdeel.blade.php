@@ -2,6 +2,9 @@
   class="
   @switch ($dagDeel->status)
     @case (\App\DagDeel::BOOKED)
+      @if(in_array($dagDeel->school->id,Auth::user()->schools()->pluck('id')->toArray()))
+        ownschoolBooked
+      @endif
       bookedCell clickablecell clickablecell-{{$dagDeel->periode->id}}
     @break
     @case (\App\DagDeel::AVAILABLE)

@@ -34,6 +34,10 @@ a.fullcell {
   color: white;
 }
 
+.ownschoolBooked{
+  opacity: 0.7;
+}
+
 .btn span.glyphicon {
 	opacity: 0;
 }
