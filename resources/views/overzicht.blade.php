@@ -15,7 +15,11 @@
       </th>
       @foreach ($leerkrachten as $key => $leerkracht)
       <th id="lkrheader_{{$leerkracht->id}}" title='test'>
+        @if($leerkracht->aanstelling()->weekschemas->count()>0)
         <a href="{{url('/periodes/create')}}?leerkracht={{$leerkracht->id }}">{{ $leerkracht->naam}}</a>
+        @else
+        {{ $leerkracht->naam}}
+        @endif
         <a href="{{url('/leerkracht/'.$leerkracht->id.'/edit')}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
       </th>
       @endforeach
@@ -41,15 +45,15 @@
 </div>
 
 @foreach ($leerkrachten as $key => $leerkracht)
-<div id="popover-content_{{$leerkracht->id}}" class="hide">
+<div id="popover-content_{{$leerkracht->id}}" class="d-none">
   <div><strong>Ambt:</strong> {{$leerkracht->ambt->naam}}</div>
   @if(( $leerkracht->wilook != null ) && ($leerkracht->wilook !== ''))
     <div><strong>Wil ook:</strong></div>
-    <div>{{$leerkracht->wilook}}dsfkqjdqklsjfklqdjfklqdsj</div>
+    <div>{{$leerkracht->wilook}}</div>
   @endif
   @if(( $leerkracht->opmerking != null ) && ($leerkracht->opmerking !== ''))
     <div><strong>Opmerking:</strong></div>
-    <div>{{$leerkracht->opmerking}}dsfkqjdqklsjfklqdjfklqdsj</div>
+    <div>{{$leerkracht->opmerking}}</div>
   @endif
 </div>
 @endforeach
