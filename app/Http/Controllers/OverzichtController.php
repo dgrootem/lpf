@@ -124,9 +124,10 @@ class OverzichtController extends Controller
 
     //kan zeker geoptimaliseerd worden door bijvoorbeeld altijd een periode te starten op een maandag?
     foreach($leerkrachten as $key => $leerkracht){
+      $aanstelling = $leerkracht->aanstelling();
       $aantalAanstellingen = $leerkracht->aanstellingen->count();
       if ($aantalAanstellingen!=0){
-        $aantalWeekSchemas = $leerkracht->aanstellingen->first()->weekschemas->count();
+        $aantalWeekSchemas = $leerkracht->aanstelling()->weekschemas->count();
         Log::debug($leerkracht->naam . " -> aantal aanstellingen=".$aantalAanstellingen) ;
         Log::debug("aantal weekschemas=".$aantalWeekSchemas);
       }
@@ -147,7 +148,7 @@ class OverzichtController extends Controller
         $formattedDate = $datumIterator->formatLocalized($format);
         //
         //trivial case
-        if (($aantalAanstellingen == 0) || ($aantalWeekSchemas==0)) {
+        if ((($aantalAanstellingen == 0) || ($aantalWeekSchemas==0)) || ($datumIterator<$aanstelling->start)){
           //Log::debug("Geen aanstelling voor ".$leerkracht->naam."..skip");
           $dateRange[$formattedDate]['VM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
           $dateRange[$formattedDate]['NM'][$leerkracht->id]->status = DagDeel::UNAVAILABLE;
