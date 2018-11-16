@@ -67,13 +67,18 @@ class LoginController extends Controller
 
         $authUser = $this->findOrCreateUser($user, 'google');
 
+  //redirect to homepage when no user is found
+	if (is_null($authUser['user']))
+	  return redirect('http://www.skbl.be');
+	else{
+
         Auth::login($authUser['user'], true);
 
         if ($authUser['new'] == true)
           return redirect('/user/'.$authUser['user']->id.'/edit');
         else
           return redirect($this->redirectTo);
-
+	}
     }
 
     /**
@@ -89,7 +94,8 @@ class LoginController extends Controller
         if ($authUser) {
             return array('user'=>$authUser,'new' => false);
         }
-        return array(
+        if (env('ALLOW_NEW_USERS') === true)
+          return array(
             'user'=>
               User::create([
               'name'     => $user->name,
@@ -99,7 +105,8 @@ class LoginController extends Controller
               ])
             ,
             'new' => true);
-
+        else
+          return array('user' => null,'new' => false);
     }
 
 

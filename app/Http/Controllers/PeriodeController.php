@@ -71,6 +71,7 @@ class PeriodeController extends Controller
     public function create()
     {
         $lkrid = request('leerkracht');
+        $originating_school_id = request('originating_school_id');
 
         $leerkracht = Leerkracht::with('aanstellingen.weekschemas.dagdelen.dag')->find($lkrid);
         if ($leerkracht->aanstellingen->count() == 0)
@@ -90,6 +91,7 @@ class PeriodeController extends Controller
         $periode->stop = $datum;
         $periode->stopDagDeel = 'NM';
         $periode->ambt = $leerkracht->ambt;
+        $periode->originating_school_id = $originating_school_id;
 
         //we put RELATIONS in arrays, so we dont need key values
         $weekschemas = array();
@@ -193,7 +195,7 @@ class PeriodeController extends Controller
         $ambts = Ambt::pluck('naam','id');
         //Log::debug('edit route');
         //Log::debug(compact('periode'));
-        $scholenlijst = School::alle()->pluck('naam','id');
+        $scholenlijst = School::alle()->pluck('afkorting','id');
         $scholen = CalculationController::totalsForCurrentUser();
         return view('periode.edit',compact(['periode','ambts','scholen','scholenlijst']));
     }
@@ -218,7 +220,7 @@ class PeriodeController extends Controller
 
     function fromRequest($name){
       $value = request($name);
-      //Log::debug(compact('name','value'));
+      Log::debug(compact('name','value'));
       return $value;
     }
 
@@ -246,6 +248,7 @@ class PeriodeController extends Controller
       $periode->opmerking = $this->fromRequest('opmerking');
       $periode->heleDag = $this->fromRequest('heleDag');
       $periode->ambt = $this->fromRequest('ambt');
+      $periode->originating_school_id = $this->fromRequest('originating_school_id');
 
       $periode->save();
 

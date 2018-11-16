@@ -73,7 +73,8 @@ $(document).ready(function () {
   $(".clickablecell-new").click(function(){
     window.location.href = "{{url('/periodes')}}/create?leerkracht="
                           +$(this).data("leerkracht")
-                          +"&datum="+$(this).data("datum");
+                          +"&datum="+$(this).data("datum")
+                          +"&originating_school_id="+$(this).data("originating-school");
 
   });
 

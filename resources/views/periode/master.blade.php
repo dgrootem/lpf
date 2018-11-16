@@ -24,6 +24,7 @@
         <input type="hidden" name="heleDag" value="1">
         <input type="hidden" name="id" value="{{$periode->id}}">
         <input type="hidden" name="status_id" value="2">
+        <input type="hidden" name="originating_school_id" value="{{$periode->originating_school_id}}">
 
         <br>
         <div class="row">

@@ -16,6 +16,9 @@
 
   "
   data-leerkracht="{{$leerkrachtid}}"
+  @if ($dagDeel->status == \App\DagDeel::AVAILABLE )
+    data-originating-school="{{$dagDeel->school->id}}"
+  @endif
   data-datum="{{$datum}}"
   @if ($dagDeel->status==\App\DagDeel::BOOKED)
     title="{{$dagDeel->periode->opmerking}}"

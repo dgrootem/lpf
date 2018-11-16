@@ -169,6 +169,20 @@ $(document).ready(function(){
     setOpdrachtBreuk(this.value);
   })
 
+  $("#mysubmit").on('submit',function(e){
+
+    var aantal = $(".dagdeel:checked").length;
+    if (aantal==0){
+      alert('Kies minstens 1 dagdeel !');
+      e.preventDefault();
+      return false;
+    }
+    else {
+      return true;
+    }
+
+  });
+
 
   function setOpdrachtBreuk(value){
     getOpdrachtBreukData(value).done(function(data){
