@@ -16,7 +16,7 @@ use Log;
 class CalculationController extends Controller
 {
     //
-    public const AANTAL_WEKEN=35;
+    public const AANTAL_WEKEN=39;
 
     public static function maxForAanstellingInSchool(Aanstelling $aanstelling,School $school){
       $aantal = array();
