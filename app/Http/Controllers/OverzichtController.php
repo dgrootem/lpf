@@ -168,7 +168,9 @@ class OverzichtController extends Controller
 
         Log::debug($formattedDate);
         //bepaal het weekschema - we halen dit enkel op wanneer we van week veranderen
-        $weekTeller = $datumIterator->weekOfYear - $firstweek; //TODO: fixen voor na januari
+        $weekTeller = $datumIterator->weekOfYear - $firstweek;
+        //FIX voor periode vanaf 1 januari
+        if ($weekTeller<0) $weekTeller = 52-$firstweek + $datumIterator->weekOfYear;
         if ((($currentWeekTeller != $weekTeller) && ($aantalWeekSchemas>1))|| (!isset($weekschema)))
         {
           $currentWeekTeller = $weekTeller;
@@ -233,8 +235,15 @@ class OverzichtController extends Controller
 
       $days = $start->diffInDays($stop)+1;
       Log::debug("Periode duurt ".$days." dagen");
-      $aantalWeken = $stop->weekOfYear - $start->weekOfYear +1; //bereken het aantal weken te overlopen
+
+      $stopweek = $stop->weekOfYear;
+      $startweek = $start->weekOfYear;
+      if (($stop->year > $start->year)  || (($stopweek < $startweek) && ($stop > $start))) $stopweek+=52;
+
+      $aantalWeken = $stopweek - $startweek +1; //bereken het aantal weken te overlopen
       Log::debug("Deze liggen in ".$aantalWeken." weken");
+      Log::debug(compact('startweek'));
+      Log::debug(compact('stopweek'));
       $datumIterator = clone $start->startOfWeek();
 
       $a = $periode->leerkracht->aanstelling();

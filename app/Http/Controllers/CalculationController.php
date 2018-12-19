@@ -103,7 +103,11 @@ class CalculationController extends Controller
             $used+=CalculationController::totalForLeerkrachtInSchool($leerkracht,$school);
           }
           $scholen[$school->id]['RV'] = $used;
-          Log::debug('used = '.$used .'/'.$max.' ('.$used/$max.'%)');
+          if ($max>0)
+            Log::debug('used = '.$used .'/'.$max.' ('.$used/$max.'%)');
+          else {
+            Log::debug('nothing used because nothing defined');
+          }
           $scholen[$school->id]['unused'] = $max - $used;
       }
       //Log::debug(CalculationController::AANTAL_WEKEN);
