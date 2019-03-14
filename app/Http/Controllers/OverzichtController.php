@@ -227,6 +227,8 @@ class OverzichtController extends Controller
       $psd=$periode->startDagDeel;
       $pe=$periode->stop;
       $ped=$periode->stopDagDeel;
+      $days = $ps->diffInDays($pe)+1;
+      Log::debug("Periode duurt ".$days." dagen");
       $start = $this->max(Carbon::parse($periode->start),$startOfRange);
       $stop = $this->min(Carbon::parse($periode->stop),$stopOfRange);
 
@@ -234,16 +236,23 @@ class OverzichtController extends Controller
       $periodeArray = $periode->toArray();
 
       $days = $start->diffInDays($stop)+1;
-      Log::debug("Periode duurt ".$days." dagen");
+      Log::debug("Beperkte periode duurt ".$days." dagen");
 
       $stopweek = $stop->weekOfYear;
       $startweek = $start->weekOfYear;
       if (($stop->year > $start->year)  || (($stopweek < $startweek) && ($stop > $start))) $stopweek+=52;
 
-      $aantalWeken = $stopweek - $startweek +1; //bereken het aantal weken te overlopen
+      $aantalWeken = (int)(ceil($days / 7));
+      $aantalWeken2 = $stopweek - $startweek +1; //bereken het aantal weken te overlopen
+
+      //om geval op te vangen waarbij een periode begint op vrijdag en eindigt op donderdag
+      // want dan zou er een week te weinig geteld worden...
+      if ($aantalWeken == $aantalWeken2-1)
+        $aantalWeken = $aantalWeken2;
+
       Log::debug("Deze liggen in ".$aantalWeken." weken");
-      Log::debug(compact('startweek'));
-      Log::debug(compact('stopweek'));
+      //Log::debug(compact('startweek'));
+      //Log::debug(compact('stopweek'));
       $datumIterator = clone $start->startOfWeek();
 
       $a = $periode->leerkracht->aanstelling();
@@ -278,6 +287,12 @@ class OverzichtController extends Controller
             //skip ZA & ZO + skip dagen die voor de startdag vallen
             if (($j<=5) && ($datumIterator>=$ps) && ($datumIterator<=$pe))
             {
+              // if ($lkrid==6){
+              //   Log::debug($ps);
+              //   Log::debug($pe);
+              //   Log::debug($j);
+              //   Log::debug($datumIterator->formatLocalized($format));
+              // }
               $dagDeel = $dateRange[$datumIterator->formatLocalized($format)]['VM'][$lkrid];
               if (!(($datumIterator == $ps) && (strcmp($psd,'NM')==0)))
               {
