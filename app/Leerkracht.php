@@ -24,7 +24,9 @@ class Leerkracht extends Model
     }
 
     public function periodes(){
-      return $this->hasMany(Periode::class);
+      return $this->hasMany(Periode::class)
+            //->join('periodes','periodes.leerkracht_id','=','leerkrachts.id')
+            ->orderBy('periodes.start','asc');
     }
 
 /*

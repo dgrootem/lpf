@@ -533,10 +533,19 @@ class PeriodeController extends Controller
       $periodes = $leerkracht->periodes;
       $calculatedValues = array();
       foreach ($periodes as $periode) {
+        if ($periode->aantalDagdelen==0) {
+          $calculatedValues[$periode->id] = 0;
+          continue;
+        }
+        $maxdagen = $this->calculateAantalDagdelen($periode,DagDeel::AVAILABLE)['aantalDagdelen'] +
+                    $this->calculateAantalDagdelen($periode,DagDeel::BOOKED)['aantalDagdelen'];
+        if ($maxdagen==0){
+          $maxdagen = $periode->aantalDagdelen ;
+          Log::warn('maxdagen voor $leerkracht->naam = 0');
+        }
+
         $calculatedValues[$periode->id] =
-          (int)($periode->aantalDagdelen * 100 /
-          ($this->calculateAantalDagdelen($periode,DagDeel::AVAILABLE)['aantalDagdelen'] +
-          $this->calculateAantalDagdelen($periode,DagDeel::BOOKED)['aantalDagdelen'])) ;
+          (int)($periode->aantalDagdelen * 100 / $maxdagen) ;
       }
 
       //return compact(['leerkracht','periodes','calculatedValues']);
