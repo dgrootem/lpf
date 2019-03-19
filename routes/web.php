@@ -15,6 +15,8 @@ Route::get('/overzichten/{startDate?}', 'OverzichtController@range');
 //Route::get('/{startDate}', 'OverzichtController@range');
 Route::get('/','OverzichtController@defaultRange');
 
+Route::get('/leerkracht/{leerkracht}/periodes','PeriodeController@overzichtVoorLeerkracht');
+
 
 Route::resource('periodes','PeriodeController');
 Route::resource('user','UserController');

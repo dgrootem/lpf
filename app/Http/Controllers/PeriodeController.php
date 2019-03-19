@@ -295,7 +295,8 @@ class PeriodeController extends Controller
       $periode->load('weekschemas.dagdelen');
 
 
-      $aantalDagdelen = $this->calculateAantalDagdelen($periode)['aantalDagdelen'];
+      $aantalDagdelen = $this->calculateAantalDagdelen($periode,DagDeel::BOOKED)['aantalDagdelen'];
+
 
       //Log::debug('aantalDagdelen=');
       //Log::debug($aantalDagdelen);
@@ -447,7 +448,7 @@ class PeriodeController extends Controller
     //    iemand die vervanging doet op maandag -> woensdag? is dat 3 dagen aan 24/24 ?
     //    iemand die vervanging doet op woensdag alleen? zou 1 dag aan 12/24 zijn...
     //    iemand die vervanging doet van donderdag tot dinsdag? 4 dagen aan 24/24 ?
-    function calculateAantalDagdelen($periode)
+    function calculateAantalDagdelen($periode,$status = DagDeel::BOOKED)
     {
       //$aantalWeken = $periode->stop->weekOfYear - $periode->start->weekOfYear +1;
       //houd rekening met volgend kalenderjaar
@@ -485,7 +486,10 @@ class PeriodeController extends Controller
         if ($currentWeekVolgorde>=0){
         //if ($datumIterator->weekOfYear > $startWeekVanAanstelling) { //only process weeks after the start of the aanstelling
           $pws = $periode->weekschemas[$currentWeekVolgorde];
-          $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->where('status',DagDeel::BOOKED)->get();
+          if (isset($status))
+            $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->where('status',$status)->get();
+          else
+            $current_dagdelen = $pws->dagdelen()->with('dagdeel.dag')->get();
           Log::debug($current_dagdelen);
 
           if ($i==1){ //eerste week speciaal behandelen
@@ -514,53 +518,6 @@ class PeriodeController extends Controller
       Log::debug("***** Aantal dagdelen =".$aantalDagdelen. " *****");
       return compact('result','aantalDagdelen');
 
-      /*
-      Log::debug(request()->all());
-      $datestart = Carbon::parse($this->fromRequest('start'));
-      $datestop = Carbon::parse($this->fromRequest('stop'));
-      $opdrachtBreuk = $this->fromRequest('aantal_uren_van_titularis');
-      $leerkracht_id = $this->fromRequest('leerkracht_id');
-      $school_id = $this->fromRequest('school_id');
-      $status = $this->fromRequest('status_id');
-      $periode_id = $this->fromRequest('periode_id');
-
-    //   return $this->berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id);
-    // }
-    //
-    // function berekenUren($datestart,$datestop,$opdrachtBreuk,$leerkracht_id,$school_id,$status,$periode_id)
-    // {
-      // Log::debug('status=' . $status);
-      /*if ($status == Status::opengesteld()){
-
-        $result = "";
-        $uren = 0;
-      }
-      else{
-*/
-
-        $dagen = $this->calculateNbDays($datestart,$datestop);
-        // Log::debug('dagen='.$dagen);
-        $leerkracht = Leerkracht::find($leerkracht_id);
-        $school = School::find($school_id);
-
-        //TODO: goed uitschrijven welke checks hier zouden kunnen achterzitten, zeer complex!!
-        /*
-        $begin = new Carbon;
-        $begin->setISODate($datestart->year,$datestart->weekOfYear);
-        $andere_periodes = Periode::periodesInRangeForLeekracht($begin,$einde,$leerkracht_id,$periode_id,0);
-        */
-        $result = null;
-        /*if ($leerkracht->lestijden_per_week < $opdrachtBreuk)
-          $result =  "OPGELET: Leerkracht heeft minder uren (" .
-                      $leerkracht->lestijden_per_week .
-                      ") dan gewenste opdracht (" . $opdrachtBreuk.")" ;
-                      */
-        // Log::debug('aantal_uren_van_titularis='.$opdrachtBreuk);
-        // Log::debug('lestijden_per_week LPF='.$leerkracht->lestijden_per_week);
-        // Log::debug('minimum='.(min($opdrachtBreuk,$leerkracht->lestijden_per_week)));
-        $uren = $dagen * min($opdrachtBreuk,$leerkracht->lestijden_per_week) / $school->school_type->noemer * PeriodeController::UREN_PER_DAG;
-      //}
-      return compact('result','uren');
     }
 
     // TODO: uitfilteren van vrije periodes
@@ -570,6 +527,20 @@ class PeriodeController extends Controller
              $d2);
              return $werkdagen+1;
 
+    }
+
+    public function overzichtVoorLeerkracht(Leerkracht $leerkracht){
+      $periodes = $leerkracht->periodes;
+      $calculatedValues = array();
+      foreach ($periodes as $periode) {
+        $calculatedValues[$periode->id] =
+          (int)($periode->aantalDagdelen * 100 /
+          ($this->calculateAantalDagdelen($periode,DagDeel::AVAILABLE)['aantalDagdelen'] +
+          $this->calculateAantalDagdelen($periode,DagDeel::BOOKED)['aantalDagdelen'])) ;
+      }
+
+      //return compact(['leerkracht','periodes','calculatedValues']);
+      return view('leerkracht.periodes',compact(['leerkracht','periodes','calculatedValues']));
     }
 
     /**

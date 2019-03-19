@@ -15,7 +15,7 @@ class PeriodeWeekSchema extends Model
   }
 
   public function scopeVoormiddagen($query){
-    return PeriodeWeekSchema::pvoormiddagenFull($query)->pluck('status','dag')->toArray();
+    return PeriodeWeekSchema::voormiddagenFull($query)->pluck('status','dag')->toArray();
   }
 
   public function scopeVoormiddagenFull($query){
@@ -23,11 +23,15 @@ class PeriodeWeekSchema extends Model
   }
 
   public function scopeNamiddagen($query){
-    return PeriodeWeekSchema::pnamiddagenFull($query)->pluck('status','dag')->toArray();
+    return PeriodeWeekSchema::namiddagenFull($query)->pluck('status','dag')->toArray();
   }
 
   public function scopeNamiddagenFull($query){
     return PeriodeDagDeel::where('weekschema_id',$this->id)->where('deel','NM')->orderBy('dag.volgorde');
+  }
+
+  public function scopeBezetteDagDelen($query){
+    return $this->hasMany(PeriodeDagDeel::class)->where('status',DagDeel::BOOKED);
   }
     //
 }

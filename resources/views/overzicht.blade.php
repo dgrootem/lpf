@@ -21,6 +21,7 @@
         {{ $leerkracht->naam}}
         {{-- @endif --}}
         <a href="{{url('/leerkracht/'.$leerkracht->id.'/edit')}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+        <a href="{{url('/leerkracht/'.$leerkracht->id.'/periodes')}}"><i class="fa fa-bar-chart" aria-hidden="true"></i></a>
       </th>
       @endforeach
     </tr>
