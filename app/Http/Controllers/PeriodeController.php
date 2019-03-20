@@ -531,6 +531,7 @@ class PeriodeController extends Controller
 
     public function overzichtVoorLeerkracht(Leerkracht $leerkracht){
       $periodes = $leerkracht->periodes;
+      $wantedperiodes = array();
       $calculatedValues = array();
       foreach ($periodes as $periode) {
         if ($periode->aantalDagdelen==0) {
@@ -546,10 +547,11 @@ class PeriodeController extends Controller
 
         $calculatedValues[$periode->id] =
           (int)($periode->aantalDagdelen * 100 / $maxdagen) ;
+        $wantedperiodes[$periode->id] = $periode;
       }
 
       //return compact(['leerkracht','periodes','calculatedValues']);
-      return view('leerkracht.periodes',compact(['leerkracht','periodes','calculatedValues']));
+      return view('leerkracht.periodes',compact(['leerkracht','wantedperiodes','calculatedValues']));
     }
 
     /**

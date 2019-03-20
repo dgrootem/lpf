@@ -17,7 +17,7 @@
     <th>Bezetting</th>
   </thead>
   <tbody>
-    @foreach ($periodes as $periode)
+    @foreach ($wantedperiodes as $periode)
       <tr>
         <td>{{$periode->start->format('d-m-Y')}}</td>
         <td>{{$periode->stop->format('d-m-Y')}}</td>
